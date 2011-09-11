@@ -21,6 +21,7 @@
 #         /clone_scanner scan #myChannelOnCurrentServer
 #        or:
 #         /clone_scanner scan Freenode.#myChanOnSpecifiedNetwork
+#     * Added completion
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -33,7 +34,7 @@
 #   - Add option to enable/disable scanning on certain channels/networks
 #   - Make clones report format configurable
 #   - Make JOIN reporting optional
-#   - Add command completion and help
+#   - Add command help
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
 #
@@ -62,7 +63,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.1"
+SCRIPT_VERSION  = "0.2"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that detects if joining users are already on the channel with a different nickname from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -144,10 +145,10 @@ def cs_command_main(data, buffer, args):
     if not channel_name:
       channel_name = weechat.buffer_get_string(buffer, "localvar_channel")
 
-    match_data = re.match('\A([^.]+)\.(#\S+)\Z', channel_name)
+    match_data = re.match('\A(irc.)?([^.]+)\.(#\S+)\Z', channel_name)
     if match_data:
-      channel_name = match_data.group(2)
-      server_name = match_data.group(1)
+      channel_name = match_data.group(3)
+      server_name = match_data.group(2)
 
     infolist_buffer_name = '%s,%s' % (server_name, channel_name)
     target_buffer_name = '%s.%s' % (server_name, channel_name)
@@ -199,7 +200,17 @@ if __name__ == "__main__" and import_ok:
     weechat.hook_signal("*,irc_in_join", "on_join_scan_cb", "")
 
     weechat.hook_command(SCRIPT_COMMAND, 
-                          "Clone Scanner",
-                          "", "", "", 
+                          SCRIPT_DESC,
+                          "[scan] [[plugin.][network.]channel] | [help]",
+                          "the target_buffer can be: \n"
+                          "- left out, so the current channel buffer will be scanned.\n"
+                          "- a plain channel name, such as #weechat, in which case it will prefixed with the current network name\n"
+                          "- a channel name prefixed with network name, such as Freenode.#weechat\n"
+                          "- a channel name prefixed with plugin and network name, such as irc.freenode.#weechat",
+
+                          " || scan %(buffers_names)"
+                          " || help",
+
                           "cs_command_main", "")
+
 
