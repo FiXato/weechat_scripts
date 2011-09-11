@@ -105,8 +105,8 @@ def on_join_scan_cb(data, signal, signal_data):
   if len(matches) > 0:
     #TODO: make match string configurable (nick, ident, hostname, ident_hostname, mask)
     match_strings = map(lambda m: m['mask'], matches)
-    weechat.prnt(cs_buffer,"%s is already on %s.%s as %s" % (joined_nick, network, chan_name, ' and '.join(match_strings)))
-    weechat.prnt(chan_buffer,"%s is already on channel as %s" % (joined_nick, ' and '.join(match_strings)))
+    weechat.prnt(cs_buffer,"%s%s is already on %s.%s as %s" % (weechat.color("red"), joined_nick, network, chan_name, ' and '.join(match_strings)))
+    weechat.prnt(chan_buffer,"%s%s is already on channel as %s" % (weechat.color("red"), joined_nick, ' and '.join(match_strings)))
   return weechat.WEECHAT_RC_OK
   
 # Create debug buffer.
