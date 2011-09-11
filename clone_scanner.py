@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 0.1 for WeeChat version 0.3
+# Clone Scanner, version 0.2 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   Detect if a joining user is a clone or not.
@@ -15,6 +15,12 @@
 # * version 0.1:  initial release.
 #     * Added an on-join clone scan. Any user that joins a channel will be
 #       matched against users already on the channel.
+# * version 0.2:  manual clone scan
+#     * Added a manual clone scan via /clone_scanner scan
+#        you can specify a target channel with:
+#         /clone_scanner scan #myChannelOnCurrentServer
+#        or:
+#         /clone_scanner scan Freenode.#myChanOnSpecifiedNetwork
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -27,7 +33,7 @@
 #   - Add option to enable/disable scanning on certain channels/networks
 #   - Make clones report format configurable
 #   - Make JOIN reporting optional
-#   - Add manual clone scan per channel
+#   - Add command completion and help
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
 #
@@ -130,6 +136,53 @@ def cs_close_cb(*kwargs):
 
 
 def cs_command_main(data, buffer, args):
+  global cs_buffer
+
+  if args[0:4] == 'scan':
+    server_name = weechat.buffer_get_string(buffer, "localvar_server")
+    channel_name = args[5:]
+    if not channel_name:
+      channel_name = weechat.buffer_get_string(buffer, "localvar_channel")
+
+    match_data = re.match('\A([^.]+)\.(#\S+)\Z', channel_name)
+    if match_data:
+      channel_name = match_data.group(2)
+      server_name = match_data.group(1)
+
+    infolist_buffer_name = '%s,%s' % (server_name, channel_name)
+    target_buffer_name = '%s.%s' % (server_name, channel_name)
+
+    infolist = weechat.infolist_get("irc_nick", "", infolist_buffer_name)
+    matches = {}
+    clone_found = False
+    while(weechat.infolist_next(infolist)):
+      ident_hostname = weechat.infolist_string(infolist, "host")
+      host_matchdata = re.match('([^@]+)@(\S+)', ident_hostname)
+      if host_matchdata:
+        nick = weechat.infolist_string(infolist, "name")
+        ident = host_matchdata.group(1)
+        hostname = host_matchdata.group(2)
+        user = {
+          'nick': nick,
+          'ident': ident,
+          'hostname': hostname,
+          'ident_hostname': ident_hostname,
+          'mask': "%s!%s" % (nick, ident_hostname)
+        }
+        if hostname not in matches:
+          matches[hostname] = []
+        else:
+          clone_found = True
+        matches[hostname].append(user)
+    if clone_found:
+      weechat.prnt(cs_buffer, "The following clones were found:")
+      hosts_with_multiple_matches = filter(lambda i: len(matches[i]) > 1, matches)
+      for host in hosts_with_multiple_matches:
+        weechat.prnt(cs_buffer, "%s is online from %s connections:" % (matches[host][0]['nick'], len(matches[host])))
+        for user in matches[host]:
+          weechat.prnt(cs_buffer, " - %s" % user['mask'])
+    else:
+      weechat.prnt(cs_buffer, "No clones found on %s" % target_buffer_name)
   return weechat.WEECHAT_RC_OK
 
 if __name__ == "__main__" and import_ok:
@@ -149,3 +202,4 @@ if __name__ == "__main__" and import_ok:
                           "Clone Scanner",
                           "", "", "", 
                           "cs_command_main", "")
+
