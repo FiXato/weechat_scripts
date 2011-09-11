@@ -175,7 +175,7 @@ def cs_command_main(data, buffer, args):
           clone_found = True
         matches[hostname].append(user)
     if clone_found:
-      weechat.prnt(cs_buffer, "The following clones were found:")
+      weechat.prnt(cs_buffer, "The following clones were found on %s:" % target_buffer_name)
       hosts_with_multiple_matches = filter(lambda i: len(matches[i]) > 1, matches)
       for host in hosts_with_multiple_matches:
         weechat.prnt(cs_buffer, "%s is online from %s connections:" % (matches[host][0]['nick'], len(matches[host])))
