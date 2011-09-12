@@ -9,6 +9,16 @@
 #   already connected users to see if they are already online from
 #   another nickname. If the user is a clone, it will report it.
 #
+# Example output for an on-join scan result:
+#   21:32:46  ▬▬▶ FiXato_Odie (FiXato@FiXato.net) has joined #lounge
+#   21:32:46      FiXato_Odie is already on the channel as FiXato!FiXato@FiXato.Net and FiX!FiXaphone@FiXato.net
+#
+# Example output for a manual scan:
+#   21:34:44 fixato.net is online from 3 nicks:
+#   21:34:44  - FiXato!FiXato@FiXato.Net
+#   21:34:44  - FiX!FiXaphone@FiXato.net
+#   21:34:44  - FiXato_Odie!FiXato@FiXato.net
+#
 ## History:
 ### 2011-09-11: FiXato:
 # 
@@ -29,6 +39,7 @@
 # * version 0.3: Refactor galore
 #     * Refactored some code. Codebase should be DRYer and clearer now.
 #     * Manual scan report lists by host instead of nick now.
+#     * Case-insensitive host-matching
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -111,7 +122,7 @@ def on_join_scan_cb(data, signal, signal_data):
     match_strings = map(lambda m: m['mask'], filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host]))
     masks = ' and '.join(match_strings)
     weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), joined_nick, network_chan_name, masks))
-    weechat.prnt(chan_buffer,"%s%s is already on channel as %s" % (weechat.color("red"), joined_nick, masks))
+    weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), joined_nick, masks))
   return weechat.WEECHAT_RC_OK
   
 # Create debug buffer.
