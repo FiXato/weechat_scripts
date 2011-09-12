@@ -9,23 +9,22 @@ Scripts I've written to add features to WeeChat I felt were missing.
 
 * clone_scanner.py
 
-  Detect if a joining user is a clone or not.
+    Detect if a joining user is a clone or not.
 
 * listbuffer.py (for now still in its own repository, but will be added later)
 
-  Show /list results in a common buffer and interact with them.
+    Show /list results in a common buffer and interact with them.
 
 ## Script ideas
 * Task https://savannah.nongnu.org/task/index.php?11351
-  Allow buffer names for irc.msgbuffer
+    "Allow buffer names for irc.msgbuffer"
 
-  (Custom (s)notices buffer)
+    (Custom (s)notices buffer)
 
 * bufferstats:
 
-  Output stats about the number of different buffers. 
+    Output stats about the number of different buffers. Something like:
 
-  Something like:
         Total of 55 buffers: 1 core, 6 server buffers, 43 channel buffers, 
         3 queries, 2 plugin buffers; 10 of them are merged.
 
