@@ -125,7 +125,7 @@ def cs_create_buffer():
   if not cs_buffer:
     # Sets notify to 0 as this buffer does not need to be in hotlist.
     cs_buffer = weechat.buffer_new("clone_scanner", "", \
-                "", "SCRIPT_CLOSE_CB", "")
+                "", SCRIPT_CLOSE_CB, "")
     weechat.buffer_set(cs_buffer, "title", "Clone Scanner")
     weechat.buffer_set(cs_buffer, "notify", "0")
     weechat.buffer_set(cs_buffer, "nicklist", "0")
