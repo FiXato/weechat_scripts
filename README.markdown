@@ -12,6 +12,19 @@ Scripts I've written to add features to WeeChat I felt were missing.
 * listbuffer.py (for now still in its own repository, but will be added later)
     Show /list results in a common buffer and interact with them.
 
+## Script ideas
+* task https://savannah.nongnu.org/task/index.php?11351 ((s)notices buffer)
+* bufferstats: output stats about the number of different buffers. 
+  Something like:
+    Total of 55 buffers: 1 core, 6 server buffers, 43 channel buffers, 
+    3 queries, 2 plugin buffers; 10 of them are merged.
+* advanced highlights manager: assign target buffers & colours to highlights;
+    dynamically create target buffer if necessary
+    
+    Example: /highlight add /(lol|nyan-?)cat/ nyancats
+    When the highlight would get triggered, it will create a new buffer,
+    python.nyancat, —should the buffer not already exist— and display the
+    message (+source buffer) in it.
 
 ## Configuration instructions
 ******************************************************************************
