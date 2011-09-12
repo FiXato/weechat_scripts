@@ -140,56 +140,65 @@ def cs_close_cb(*kwargs):
   return weechat.WEECHAT_RC_OK
 
 
-def cs_command_main(data, buffer, args):
-  global cs_buffer
+def get_channel_from_buffer_args(buffer, args):
+  server_name = weechat.buffer_get_string(buffer, "localvar_server")
+  channel_name = args
+  if not channel_name:
+    channel_name = weechat.buffer_get_string(buffer, "localvar_channel")
 
-  if args[0:4] == 'scan':    
-    server_name = weechat.buffer_get_string(buffer, "localvar_server")
-    channel_name = args[5:]
-    if not channel_name:
-      channel_name = weechat.buffer_get_string(buffer, "localvar_channel")
+  match_data = re.match('\A(irc.)?([^.]+)\.(#\S+)\Z', channel_name)
+  if match_data:
+    channel_name = match_data.group(3)
+    server_name = match_data.group(2)
+  
+  return server_name, channel_name
 
-    match_data = re.match('\A(irc.)?([^.]+)\.(#\S+)\Z', channel_name)
-    if match_data:
-      channel_name = match_data.group(3)
-      server_name = match_data.group(2)
+def get_clones_for_buffer(infolist_buffer_name):
+  matches = {}
+  infolist = weechat.infolist_get("irc_nick", "", infolist_buffer_name)
+  while(weechat.infolist_next(infolist)):
+    ident_hostname = weechat.infolist_string(infolist, "host")
+    host_matchdata = re.match('([^@]+)@(\S+)', ident_hostname)
+    if not host_matchdata:
+      continue
 
-    infolist_buffer_name = '%s,%s' % (server_name, channel_name)
-    target_buffer_name = '%s.%s' % (server_name, channel_name)
+    nick     = weechat.infolist_string(infolist, "name")
+    hostname = host_matchdata.group(2)
+    if hostname not in matches:
+      matches[hostname] = []
 
-    infolist = weechat.infolist_get("irc_nick", "", infolist_buffer_name)
-    matches = {}
-    clone_found = False
-    while(weechat.infolist_next(infolist)):
-      ident_hostname = weechat.infolist_string(infolist, "host")
-      host_matchdata = re.match('([^@]+)@(\S+)', ident_hostname)
-      if host_matchdata:
-        nick = weechat.infolist_string(infolist, "name")
-        ident = host_matchdata.group(1)
-        hostname = host_matchdata.group(2)
-        user = {
-          'nick': nick,
-          'ident': ident,
-          'hostname': hostname,
-          'ident_hostname': ident_hostname,
-          'mask': "%s!%s" % (nick, ident_hostname)
-        }
-        if hostname not in matches:
-          matches[hostname] = []
-        else:
-          clone_found = True
-        matches[hostname].append(user)
+    matches[hostname].append({
+      'nick': nick,
+      'mask': "%s!%s" % (nick, ident_hostname),
+      'ident': host_matchdata.group(1),
+      'ident_hostname': ident_hostname,
+      'hostname': hostname,
+    })
 
+  #Select only the results that have more than 1 match for a host
+  return dict((k, v) for (k, v) in matches.iteritems() if len(v) > 1)
+
+def report_clones(clones, scanned_buffer_name, target_buffer=None):
+  # Default to clone_scanner buffer
+  if not target_buffer:
     cs_create_buffer()
-    if clone_found:
-      weechat.prnt(cs_buffer, "The following clones were found on %s:" % target_buffer_name)
-      hosts_with_multiple_matches = filter(lambda i: len(matches[i]) > 1, matches)
-      for host in hosts_with_multiple_matches:
-        weechat.prnt(cs_buffer, "%s is online from %s connections:" % (matches[host][0]['nick'], len(matches[host])))
-        for user in matches[host]:
-          weechat.prnt(cs_buffer, " - %s" % user['mask'])
-    else:
-      weechat.prnt(cs_buffer, "No clones found on %s" % target_buffer_name)
+    global cs_buffer
+    target_buffer = cs_buffer
+
+  if clones:
+    weechat.prnt(target_buffer, "The following clones were found on %s:" % scanned_buffer_name)
+    for (host, clones) in clones.iteritems():
+      weechat.prnt(target_buffer, "%s is online from %s nicks:" % (host, len(clones)))
+      for user in clones:
+        weechat.prnt(target_buffer, " - %s" % user['mask'])
+  else:
+    weechat.prnt(target_buffer, "No clones found on %s" % scanned_buffer_name)
+
+def cs_command_main(data, buffer, args):
+  if args[0:4] == 'scan':    
+    server_name, channel_name = get_channel_from_buffer_args(buffer, args[5:])
+    clones = get_clones_for_buffer('%s,%s' % (server_name, channel_name))
+    report_clones(clones, '%s.%s' % (server_name, channel_name))
   return weechat.WEECHAT_RC_OK
 
 if __name__ == "__main__" and import_ok:
