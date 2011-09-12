@@ -172,6 +172,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
       'ident_hostname': ident_hostname,
       'hostname': hostname,
     })
+  weechat.infolist_free(infolist)
 
   #Select only the results that have more than 1 match for a host
   return dict((k, v) for (k, v) in matches.iteritems() if len(v) > 1)
