@@ -11,7 +11,7 @@ Scripts I've written to add features to WeeChat I felt were missing.
 
     Detect if a joining user is a clone or not.
 
-* listbuffer.py (for now still in its own repository, but will be added later)
+* listbuffer.py (for now still developed in its own repository)
 
     Show /list results in a common buffer and interact with them.
 

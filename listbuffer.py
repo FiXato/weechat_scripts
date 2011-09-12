@@ -1,0 +1,1 @@
+/Users/FiXato/Development/FiXato/weechat_scripts/listbuffer/listbuffer.py
