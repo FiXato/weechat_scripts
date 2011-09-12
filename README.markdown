@@ -36,7 +36,7 @@ Scripts I've written to add features to WeeChat I felt were missing.
     Example: `/highlight add /(lol|nyan-?)cat/ nyancats`
     
     When the highlight would get triggered, it will create a new buffer,
-    `python.nyancat`, —should the buffer not already exist— and display the
+    `python.nyancats`, —should the buffer not already exist— and display the
     message (+source buffer) in it.
 
 ## Installation instructions
