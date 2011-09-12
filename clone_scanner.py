@@ -37,6 +37,8 @@
 #   - Add command help
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
+#   - Make output buffer optional. Allow for having the results just in 
+#     the current buffer.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
