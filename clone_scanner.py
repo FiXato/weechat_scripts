@@ -92,6 +92,8 @@ def on_join_scan_cb(data, signal, signal_data):
   parsed_host = join_match_data.group(3)
   chan_name = join_match_data.group(4)
   chan_buffer = weechat.buffer_search("irc", "%s.%s" % (network, chan_name))
+
+  cs_create_buffer()
   weechat.prnt(cs_buffer, "%s!%s JOINed %s.%s" % (joined_nick, parsed_host, network, chan_name))
 
   infolist = weechat.infolist_get("irc_nick", "", "%s,%s" % (network, chan_name))
@@ -141,7 +143,7 @@ def cs_close_cb(*kwargs):
 def cs_command_main(data, buffer, args):
   global cs_buffer
 
-  if args[0:4] == 'scan':
+  if args[0:4] == 'scan':    
     server_name = weechat.buffer_get_string(buffer, "localvar_server")
     channel_name = args[5:]
     if not channel_name:
@@ -177,6 +179,8 @@ def cs_command_main(data, buffer, args):
         else:
           clone_found = True
         matches[hostname].append(user)
+
+    cs_create_buffer()
     if clone_found:
       weechat.prnt(cs_buffer, "The following clones were found on %s:" % target_buffer_name)
       hosts_with_multiple_matches = filter(lambda i: len(matches[i]) > 1, matches)
