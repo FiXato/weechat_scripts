@@ -26,8 +26,14 @@ Scripts I've written to add features to WeeChat I felt were missing.
     python.nyancat, —should the buffer not already exist— and display the
     message (+source buffer) in it.
 
-## Configuration instructions
+## Installation instructions
 ******************************************************************************
+
+* `mkdir -p ~/src/github/FiXato && cd ~/src/github/FiXato`
+* `git clone git://github.com/FiXato/weechat_scripts.git`
+* `cd weechat_scripts`
+* `ln -s *.py ~/.weechat/python/`
+* and if you want to autoload: `ln -s *.py ~/.weechat/python/autoload/`
 
 
 ## History
