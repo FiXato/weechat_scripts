@@ -21,9 +21,10 @@ Scripts I've written to add features to WeeChat I felt were missing.
 * advanced highlights manager: assign target buffers & colours to highlights;
     dynamically create target buffer if necessary
     
-    Example: /highlight add /(lol|nyan-?)cat/ nyancats
+    Example: `/highlight add /(lol|nyan-?)cat/ nyancats`
+    
     When the highlight would get triggered, it will create a new buffer,
-    python.nyancat, —should the buffer not already exist— and display the
+    `python.nyancat`, —should the buffer not already exist— and display the
     message (+source buffer) in it.
 
 ## Installation instructions
