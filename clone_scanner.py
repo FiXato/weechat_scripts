@@ -148,7 +148,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
     host_matchdata = re.match('([^@]+)@(\S+)', ident_hostname)
     hostname = host_matchdata.group(2)
 
-    if hostname_to_match and hostname_to_match != hostname
+    if hostname_to_match and hostname_to_match != hostname:
       continue
 
     if not host_matchdata:
