@@ -86,38 +86,22 @@ def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
   network = signal.split(',')[0]
   joined_nick = weechat.info_get("irc_nick_from_host", signal_data)
-  join_match_data = re.match(':([^!]+)!([^@]+)@(\S+) JOIN :?(#\S+)', signal_data)
-  parsed_nick = join_match_data.group(1)
-  parsed_ident = join_match_data.group(2)
-  parsed_host = join_match_data.group(3)
-  chan_name = join_match_data.group(4)
+  join_match_data = re.match(':[^!]+![^@]+@(\S+) JOIN :?(#\S+)', signal_data)
+  parsed_host = join_match_data.group(1)
+  chan_name = join_match_data.group(2)
   chan_buffer = weechat.buffer_search("irc", "%s.%s" % (network, chan_name))
+  network_chan_name = "%s.%s" % (network, chan_name)
 
   cs_create_buffer()
-  weechat.prnt(cs_buffer, "%s!%s JOINed %s.%s" % (joined_nick, parsed_host, network, chan_name))
+  weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (joined_nick, parsed_host, network_chan_name))
 
-  infolist = weechat.infolist_get("irc_nick", "", "%s,%s" % (network, chan_name))
-  matches = []
-  while(weechat.infolist_next(infolist)):
-    ident_hostname = weechat.infolist_string(infolist, "host")
-    host_matchdata = re.match('([^@]+)@(\S+)', ident_hostname)
-    if host_matchdata:
-      nick = weechat.infolist_string(infolist, "name")
-      ident = host_matchdata.group(1)
-      hostname = host_matchdata.group(2)
-      if(hostname == parsed_host):
-        matches.append({
-          'nick': nick, 
-          'ident': ident, 
-          'hostname': hostname,
-          'ident_hostname': ident_hostname, 
-          'mask': "%s!%s" % (nick, ident_hostname)
-        })
-  if len(matches) > 0:
+  clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
+  if clones:
     #TODO: make match string configurable (nick, ident, hostname, ident_hostname, mask)
-    match_strings = map(lambda m: m['mask'], matches)
-    weechat.prnt(cs_buffer,"%s%s is already on %s.%s as %s" % (weechat.color("red"), joined_nick, network, chan_name, ' and '.join(match_strings)))
-    weechat.prnt(chan_buffer,"%s%s is already on channel as %s" % (weechat.color("red"), joined_nick, ' and '.join(match_strings)))
+    match_strings = map(lambda m: m['mask'], hosts)
+    masks = ' and '.join(match_strings)
+    weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), joined_nick, network_chan_name, masks))
+    weechat.prnt(chan_buffer,"%s%s is already on channel as %s" % (weechat.color("red"), joined_nick, masks))
   return weechat.WEECHAT_RC_OK
   
 # Create debug buffer.
@@ -153,20 +137,24 @@ def get_channel_from_buffer_args(buffer, args):
   
   return server_name, channel_name
 
-def get_clones_for_buffer(infolist_buffer_name):
+def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
   matches = {}
   infolist = weechat.infolist_get("irc_nick", "", infolist_buffer_name)
   while(weechat.infolist_next(infolist)):
     ident_hostname = weechat.infolist_string(infolist, "host")
     host_matchdata = re.match('([^@]+)@(\S+)', ident_hostname)
+    hostname = host_matchdata.group(2)
+
+    if hostname_to_match and hostname_to_match != hostname
+      continue
+
     if not host_matchdata:
       continue
 
-    nick     = weechat.infolist_string(infolist, "name")
-    hostname = host_matchdata.group(2)
     if hostname not in matches:
       matches[hostname] = []
 
+    nick = weechat.infolist_string(infolist, "name")
     matches[hostname].append({
       'nick': nick,
       'mask': "%s!%s" % (nick, ident_hostname),
