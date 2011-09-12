@@ -89,8 +89,11 @@ def on_join_scan_cb(data, signal, signal_data):
   join_match_data = re.match(':[^!]+![^@]+@(\S+) JOIN :?(#\S+)', signal_data)
   parsed_host = join_match_data.group(1)
   chan_name = join_match_data.group(2)
-  chan_buffer = weechat.buffer_search("irc", "%s.%s" % (network, chan_name))
   network_chan_name = "%s.%s" % (network, chan_name)
+  chan_buffer = weechat.buffer_search("irc", "%s.%s" % (network, chan_name))
+  if not chan_buffer
+    print "No IRC channel buffer found for %s" % network_chan_name
+    return weechat.WEECHAT_RC_OK
 
   cs_create_buffer()
   weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (joined_nick, parsed_host, network_chan_name))
