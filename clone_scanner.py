@@ -40,6 +40,9 @@
 #     * Refactored some code. Codebase should be DRYer and clearer now.
 #     * Manual scan report lists by host instead of nick now.
 #     * Case-insensitive host-matching
+#     * Bugfixed the infolist memleak.
+#     * on-join scanner works again
+#     * Output examples added to the comments
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
