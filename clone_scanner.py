@@ -3,11 +3,14 @@
 # Clone Scanner, version 0.3 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
-#   Detect if a joining user is a clone or not.
+#   A Clone Scanner that can manually scan channels and 
+#   automatically scans joins for users on the channel 
+#   with multiple nicknames from the same host.
 #
 #   Upon join by a user, the user's host is compared to the infolist of 
 #   already connected users to see if they are already online from
 #   another nickname. If the user is a clone, it will report it.
+#   With the '/clone_scanner scan' command you can manually scan a chan.
 #
 # Example output for an on-join scan result:
 #   21:32:46  ▬▬▶ FiXato_Odie (FiXato@FiXato.net) has joined #lounge
@@ -88,7 +91,7 @@ SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
 SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "MIT"
-SCRIPT_DESC     = "A Clone Scanner that detects if joining users are already on the channel with a different nickname from the same host."
+SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
 SCRIPT_CLOSE_CB = "cs_close_cb"
 
