@@ -7,7 +7,7 @@
 #
 #   This script allows you to easily join channels from the /list output.
 #   It will open a common buffer for the /list result, through which you
-#   browse with your cursor keys, and join with the enter key.
+#   browse with your cursor keys, and join with the meta-enter keys.
 #
 ## History:
 ### 2011-09-08: FiXato:
@@ -30,6 +30,7 @@
 #
 # * version 0.4: 
 #     * Case-insensitive buffer lookup fix.
+#     * Removed default enter keybind
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass IRC client WeeChat
@@ -136,7 +137,6 @@ def lb_create_buffer():
     weechat.buffer_set(lb_buffer, "key_bind_meta2-1~", "/listbuffer **scroll_top")
     weechat.buffer_set(lb_buffer, "key_bind_meta2-4~", "/listbuffer **scroll_bottom")
     weechat.buffer_set(lb_buffer, "key_bind_meta-ctrl-J", "/listbuffer **enter")
-    weechat.buffer_set(lb_buffer, "key_bind_ctrl-M", "/listbuffer **enter")
     weechat.buffer_set(lb_buffer, "key_bind_meta-ctrl-M", "/listbuffer **enter")
     weechat.buffer_set(lb_buffer, "key_bind_meta->", "/listbuffer **sort_next")
     weechat.buffer_set(lb_buffer, "key_bind_meta-<", "/listbuffer **sort_previous")
