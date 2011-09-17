@@ -21,9 +21,15 @@
 # * version 0.2:  /list format bugfix
 #     * added support for /list results without modes
 #     * some servers don't send 321 (/list start). Taken into account.
+#
 # * version 0.3: Sorting support
 #     * Added some basic sorting support. Scroll through sort options
 #        with meta-> and meta-< (users, channel, topic, modes)
+#
+###
+#
+# * version 0.4: 
+#     * Case-insensitive buffer lookup fix.
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass IRC client WeeChat
@@ -254,10 +260,10 @@ def lb_line_down():
 def lb_line_run():
   global lb_channels, lb_curline, lb_network
 
-  buffer = weechat.buffer_search("irc", "server.%s" % lb_network)
+  buff = weechat.info_get("irc_buffer", lb_network)
   channel = lb_channels[lb_curline]['channel']
   command = "/join %s" % channel
-  weechat.command(buffer, command)
+  weechat.command(buff, command)
   return
 
 def lb_line_select():
