@@ -119,7 +119,7 @@ def on_join_scan_cb(data, signal, signal_data):
   parsed_host = join_match_data.group(2).lower()
   chan_name = join_match_data.group(3)
   network_chan_name = "%s.%s" % (network, chan_name)
-  chan_buffer = weechat.info_get("irc_buffer", (network, chan_name))
+  chan_buffer = weechat.info_get("irc_buffer", "%s,%s" % (network, chan_name))
   if not chan_buffer:
     print "No IRC channel buffer found for %s" % network_chan_name
     return weechat.WEECHAT_RC_OK
