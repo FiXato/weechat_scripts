@@ -104,9 +104,10 @@ def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
   network = signal.split(',')[0]
   joined_nick = weechat.info_get("irc_nick_from_host", signal_data)
-  join_match_data = re.match(':[^!]+![^@]+@(\S+) JOIN :?(#\S+)', signal_data)
-  parsed_host = join_match_data.group(1).lower()
-  chan_name = join_match_data.group(2)
+  join_match_data = re.match(':[^!]+!([^@]+@(\S+)) JOIN :?(#\S+)', signal_data)
+  parsed_ident_host = join_match_data.group(1)
+  parsed_host = join_match_data.group(2).lower()
+  chan_name = join_match_data.group(3)
   network_chan_name = "%s.%s" % (network, chan_name)
   chan_buffer = weechat.buffer_search("irc", "%s.%s" % (network, chan_name))
   if not chan_buffer:
@@ -114,7 +115,7 @@ def on_join_scan_cb(data, signal, signal_data):
     return weechat.WEECHAT_RC_OK
 
   cs_create_buffer()
-  weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (joined_nick, parsed_host, network_chan_name))
+  weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (joined_nick, parsed_ident_host, network_chan_name))
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
