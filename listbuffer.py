@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ListBuffer, version 0.2 for WeeChat version 0.3
+# ListBuffer, version 0.3 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/listbuffer
 #
 #   Show /list results in a common buffer and interact with them.
@@ -81,7 +81,7 @@
 #
 SCRIPT_NAME    = "listbuffer"
 SCRIPT_AUTHOR  = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION = "0.2"
+SCRIPT_VERSION = "0.3"
 SCRIPT_LICENSE = "MIT"
 SCRIPT_DESC    = "A common buffer for /list output."
 SCRIPT_COMMAND = "listbuffer"
