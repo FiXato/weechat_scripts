@@ -67,6 +67,7 @@
 #   - Add cross-server clone scan
 #   - Make output buffer optional. Allow for having the results just in 
 #     the current buffer.
+#   - Add optional command redirection.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
