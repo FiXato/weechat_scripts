@@ -330,7 +330,10 @@ def lb_sort(sort_key=None):
   global lb_channels, lb_current_sort
   if sort_key:
     lb_current_sort = sort_key
-  lb_channels = sorted(lb_channels, key=lambda chan_data: chan_data[lb_current_sort])
+  if lb_current_sort == 'users':
+    lb_channels = sorted(lb_channels, key=lambda chan_data: int(chan_data[lb_current_sort]))
+  else:
+    lb_channels = sorted(lb_channels, key=lambda chan_data: chan_data[lb_current_sort])
   lb_refresh()
 
 def lb_close_cb(*kwargs):
