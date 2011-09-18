@@ -126,7 +126,7 @@ def on_join_scan_cb(data, signal, signal_data):
     return weechat.WEECHAT_RC_OK
 
   cs_create_buffer()
-  weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (joined_nick, parsed_ident_host, network_chan_name))
+  weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (bold(joined_nick), parsed_ident_host, network_chan_name))
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
@@ -136,7 +136,10 @@ def on_join_scan_cb(data, signal, signal_data):
     weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), joined_nick, network_chan_name, masks))
     weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), joined_nick, masks))
   return weechat.WEECHAT_RC_OK
-  
+
+def bold(str):
+  "%s%s%s" % weechat.color("bold"), str, weechat.color("bold")
+
 # Create debug buffer.
 def cs_create_buffer():
   global cs_buffer
