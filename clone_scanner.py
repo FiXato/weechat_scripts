@@ -138,7 +138,7 @@ def on_join_scan_cb(data, signal, signal_data):
   return weechat.WEECHAT_RC_OK
 
 def bold(str):
-  "%s%s%s" % (weechat.color("bold"), str, weechat.color("bold"))
+  return "%s%s%s" % (weechat.color("bold"), str, weechat.color("bold"))
 
 # Create debug buffer.
 def cs_create_buffer():
