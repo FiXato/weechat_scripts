@@ -267,7 +267,7 @@ def cs_set_default_settings():
 if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, SCRIPT_CLOSE_CB, ""):
-    cs_set_default_settings
+    cs_set_default_settings()
 
     cs_buffer = weechat.buffer_search("python", "clone_scanner")
     cs_create_buffer()
