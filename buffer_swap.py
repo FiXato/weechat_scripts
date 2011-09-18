@@ -20,7 +20,7 @@
 #    client WeeChat
 #
 ## TODO: 
-#   - Code the script
+#   - Possibly support buffer names instead of just numbers.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
