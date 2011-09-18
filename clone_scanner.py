@@ -233,7 +233,7 @@ def report_clones(clones, scanned_buffer_name, target_buffer=None):
     target_buffer = cs_buffer
 
   if clones:
-    weechat.prnt(target_buffer, "The following clones were found on %s:" % scanned_buffer_name)
+    weechat.prnt(target_buffer, "%s hosts with clones were found on %s:" % (len(clones), scanned_buffer_name))
     for (host, clones) in clones.iteritems():
       weechat.prnt(target_buffer, "%s is online from %s nicks:" % (host, len(clones)))
       for user in clones:
