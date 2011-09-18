@@ -261,6 +261,7 @@ def cs_set_default_settings():
   for option, default_value, description in cs_settings:
      if not weechat.config_is_set_plugin(option):
          weechat.config_set_plugin(option, default_value)
+         version = weechat.info_get("version_number", "") or 0
          if int(version) >= 0x00030500:
              weechat.config_set_desc_plugin(option, description)
 
