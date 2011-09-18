@@ -133,8 +133,8 @@ def on_join_scan_cb(data, signal, signal_data):
     #TODO: make match string configurable (nick, ident, hostname, ident_hostname, mask)
     match_strings = map(lambda m: m['mask'], filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host]))
     masks = ' and '.join(match_strings)
-    weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), joined_nick, network_chan_name, masks))
-    weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), joined_nick, masks))
+    weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
+    weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), bold(joined_nick), masks))
   return weechat.WEECHAT_RC_OK
 
 def bold(str):
@@ -194,7 +194,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
     nick = weechat.infolist_string(infolist, "name")
     matches[hostname].append({
       'nick': nick,
-      'mask': "%s!%s" % (nick, ident_hostname),
+      'mask': "%s!%s" % (bold(nick), ident_hostname),
       'ident': host_matchdata.group(1),
       'ident_hostname': ident_hostname,
       'hostname': hostname,
