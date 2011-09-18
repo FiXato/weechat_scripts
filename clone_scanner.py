@@ -163,7 +163,7 @@ def on_join_scan_cb(data, signal, signal_data):
     if weechat.config_get_plugin("display_onjoin_alert_target_buffer") == "on":
       weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), bold(joined_nick), masks))
     if weechat.config_get_plugin("display_onjoin_alert_current_buffer") == "on":
-      weechat.prnt("","%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
+      weechat.prnt(weechat.current_buffer(),"%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
   return weechat.WEECHAT_RC_OK
 
 def bold(str):
