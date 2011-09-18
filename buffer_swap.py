@@ -73,7 +73,7 @@ def command_main(data, buffer, args):
   curr_buffer = weechat.current_buffer()
   curr_buffer_number = weechat.buffer_get_integer(curr_buffer, "number")
 
-  if len(args) != 1 || len(args) != 2:
+  if len(args) != 1 or len(args) != 2:
     weechat.prnt("", "You need to specify 1 or 2 buffers")
     return weechat.WEECHAT_RC_ERROR
 
