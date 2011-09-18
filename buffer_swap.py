@@ -72,7 +72,7 @@ def command_main(data, buffer, args):
 
   weechat.command(None, "/buffer %s" % args[1])
   second_buffer = weechat.current_buffer()
-  second_buffer_number = weechat.buffer_get_integer(second_buffer_number, "number")
+  second_buffer_number = weechat.buffer_get_integer(second_buffer, "number")
   
   weechat.buffer_set(first_buffer, "number", second_buffer_number)
   weechat.buffer_set(second_buffer, "number", first_buffer_number)
