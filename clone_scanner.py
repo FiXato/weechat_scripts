@@ -50,6 +50,7 @@
 ###
 # * version 0.4: 
 #     * Case-insensitive buffer lookup fix.
+#     * Added some bold formatting to the nicks in the responses
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
