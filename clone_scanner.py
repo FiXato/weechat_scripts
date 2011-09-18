@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 0.3 for WeeChat version 0.3
+# Clone Scanner, version 0.4 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -11,6 +11,10 @@
 #   already connected users to see if they are already online from
 #   another nickname. If the user is a clone, it will report it.
 #   With the '/clone_scanner scan' command you can manually scan a chan.
+#
+#   See /set plugins.var.python.clone_scanner.* for all possible options
+#   Use the brilliant iset.pl plugin (/weeget install iset) to see what they do
+#   Or check the sourcecode below.
 #
 # Example output for an on-join scan result:
 #   21:32:46  ▬▬▶ FiXato_Odie (FiXato@FiXato.net) has joined #lounge
@@ -47,10 +51,11 @@
 #     * on-join scanner works again
 #     * Output examples added to the comments
 #
-###
-# * version 0.4: 
+### 2011-09-19
+# * version 0.4: Option galore
 #     * Case-insensitive buffer lookup fix.
 #     * Added some bold formatting to the nicks in the responses
+#     * Made most messages optional through settings
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -95,7 +100,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.3"
+SCRIPT_VERSION  = "0.4"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -111,6 +116,15 @@ except ImportError:
 
 import re
 cs_buffer = None
+cs_settings = (
+    ("display_join_messages",               "off", "Display all joins in the clone_scanner buffer"),
+    ("display_onjoin_alert_clone_buffer",   "on", "Display a on-join clone alert in the clone_scanner buffer"),
+    ("display_onjoin_alert_target_buffer",  "on", "Display a on-join clone alert in the buffer where the clone was detected"),
+    ("display_onjoin_alert_current_buffer", "off", "Display a on-join clone alert in the current buffer"),
+    ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
+    ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
+    ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
+)
 
 def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
@@ -126,16 +140,22 @@ def on_join_scan_cb(data, signal, signal_data):
     print "No IRC channel buffer found for %s" % network_chan_name
     return weechat.WEECHAT_RC_OK
 
-  cs_create_buffer()
-  weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (bold(joined_nick), parsed_ident_host, network_chan_name))
+  if weechat.config_get_plugin("display_join_messages") == "on":
+    cs_create_buffer()
+    weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (bold(joined_nick), parsed_ident_host, network_chan_name))
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
     #TODO: make match string configurable (nick, ident, hostname, ident_hostname, mask)
     match_strings = map(lambda m: m['mask'], filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host]))
     masks = ' and '.join(match_strings)
-    weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
-    weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), bold(joined_nick), masks))
+    if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
+      cs_create_buffer()
+      weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
+    if weechat.config_get_plugin("display_onjoin_alert_target_buffer") == "on":
+      weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), bold(joined_nick), masks))
+    if weechat.config_get_plugin("display_onjoin_alert_current_buffer") == "on":
+      weechat.prnt("","%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
   return weechat.WEECHAT_RC_OK
 
 def bold(str):
@@ -225,16 +245,29 @@ def cs_command_main(data, buffer, args):
   if args[0:4] == 'scan':    
     server_name, channel_name = get_channel_from_buffer_args(buffer, args[5:])
     clones = get_clones_for_buffer('%s,%s' % (server_name, channel_name))
-    report_clones(clones, '%s.%s' % (server_name, channel_name))
+    if weechat.config_get_plugin("display_scan_report_target_buffer") == "on":
+      target_buffer = weechat.info_get("irc_buffer", "%s,%s" % (server_name, channel_name))
+      report_clones(clones, '%s.%s' % (server_name, channel_name, target_buffer))
+    if weechat.config_get_plugin("display_scan_report_clone_buffer") == "on":
+      report_clones(clones, '%s.%s' % (server_name, channel_name))
+    if weechat.config_get_plugin("display_scan_report_current_buffer") == "on":
+      report_clones(clones, '%s.%s' % (server_name, channel_name, weechat.current_buffer()))
   return weechat.WEECHAT_RC_OK
+
+def cs_set_default_settings():
+  global cs_settings
+
+  # Set default settings
+  for option, default_value, description in cs_settings:
+     if not weechat.config_is_set_plugin(option):
+         weechat.config_set_plugin(option, default_value)
+         if int(version) >= 0x00030500:
+             weechat.config_set_desc_plugin(option, description)
 
 if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, SCRIPT_CLOSE_CB, ""):
-    #        # Set default settings
-    #        for option, default_value in cs_settings.iteritems():
-    #            if not weechat.config_is_set_plugin(option):
-    #                weechat.config_set_plugin(option, default_value)
+    cs_set_default_settings
 
     cs_buffer = weechat.buffer_search("python", "clone_scanner")
     cs_create_buffer()
@@ -248,7 +281,8 @@ if __name__ == "__main__" and import_ok:
                           "- left out, so the current channel buffer will be scanned.\n"
                           "- a plain channel name, such as #weechat, in which case it will prefixed with the current network name\n"
                           "- a channel name prefixed with network name, such as Freenode.#weechat\n"
-                          "- a channel name prefixed with plugin and network name, such as irc.freenode.#weechat",
+                          "- a channel name prefixed with plugin and network name, such as irc.freenode.#weechat\n"
+                          "See /set plugins.var.python.clone_scanner.* for all possible configuration options",
 
                           " || scan %(buffers_names)"
                           " || help",
