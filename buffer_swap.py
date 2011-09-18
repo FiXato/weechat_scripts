@@ -66,11 +66,11 @@ def command_main(data, buffer, args):
     weechat.prnt("", "You need to specify 2 buffers")
     return weechat.WEECHAT_RC_ERROR
   
-  weechat.command(None, "/buffer %s" % args[0])
+  weechat.command("", "/buffer %s" % args[0])
   first_buffer = weechat.current_buffer()
   first_buffer_number = weechat.buffer_get_integer(first_buffer, "number")
 
-  weechat.command(None, "/buffer %s" % args[1])
+  weechat.command("", "/buffer %s" % args[1])
   second_buffer = weechat.current_buffer()
   second_buffer_number = weechat.buffer_get_integer(second_buffer, "number")
   
