@@ -122,8 +122,8 @@ cs_settings = (
     ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
     ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
     ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
-    ("clone_report_key"),                   "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
-    ("clone_onjoin_alert_key"),             "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
+    ("clone_report_key",                    "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
+    ("clone_onjoin_alert_key",              "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
 )
 def get_validated_key_from_config(setting):
   key = weechat.config_get_plugin(setting)
