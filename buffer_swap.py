@@ -118,14 +118,14 @@ if __name__ == "__main__" and import_ok:
                           SCRIPT_DESC,
                           "[buffer] <buffer to swap with>",
                           "Swaps given buffers: \n"
-                          "the /%s command accepts anything that /buffer would accept for switching buffers\n" % SCRIPT_COMMAND
-                          "/%s 3 10\n" % SCRIPT_COMMAND
+                          "the /swap command accepts anything that /buffer would accept for switching buffers\n"
+                          "/swap 3 10\n"
                           "would swap buffer 3 and 10 of place\n"
-                          "/%s 3\n" % SCRIPT_COMMAND
+                          "/swap 3\n"
                           "would swap current buffer with buffer number 10\n"
-                          "/%s 3 #weechat\n" % SCRIPT_COMMAND
+                          "/swap 3 #weechat\n"
                           "would swap buffer 3 and the #weechat buffer of place\n"
-                          "/%s #weechat\n" % SCRIPT_COMMAND
+                          "/swap #weechat\n"
                           "would swap current buffer with the #weechat buffer",
 
                           "",
