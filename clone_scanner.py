@@ -118,9 +118,9 @@ import re
 cs_buffer = None
 cs_settings = (
     ("display_join_messages",               "off", "Display all joins in the clone_scanner buffer"),
-    ("display_onjoin_alert_clone_buffer",   "on", "Display a on-join clone alert in the clone_scanner buffer"),
-    ("display_onjoin_alert_target_buffer",  "on", "Display a on-join clone alert in the buffer where the clone was detected"),
-    ("display_onjoin_alert_current_buffer", "off", "Display a on-join clone alert in the current buffer"),
+    ("display_onjoin_alert_clone_buffer",   "on", "Display an on-join clone alert in the clone_scanner buffer"),
+    ("display_onjoin_alert_target_buffer",  "on", "Display an on-join clone alert in the buffer where the clone was detected"),
+    ("display_onjoin_alert_current_buffer", "off", "Display an on-join clone alert in the current buffer"),
     ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
     ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
     ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
@@ -247,11 +247,11 @@ def cs_command_main(data, buffer, args):
     clones = get_clones_for_buffer('%s,%s' % (server_name, channel_name))
     if weechat.config_get_plugin("display_scan_report_target_buffer") == "on":
       target_buffer = weechat.info_get("irc_buffer", "%s,%s" % (server_name, channel_name))
-      report_clones(clones, '%s.%s' % (server_name, channel_name, target_buffer))
+      report_clones(clones, '%s.%s' % (server_name, channel_name), target_buffer)
     if weechat.config_get_plugin("display_scan_report_clone_buffer") == "on":
       report_clones(clones, '%s.%s' % (server_name, channel_name))
     if weechat.config_get_plugin("display_scan_report_current_buffer") == "on":
-      report_clones(clones, '%s.%s' % (server_name, channel_name, weechat.current_buffer()))
+      report_clones(clones, '%s.%s' % (server_name, channel_name), weechat.current_buffer())
   return weechat.WEECHAT_RC_OK
 
 def cs_set_default_settings():
