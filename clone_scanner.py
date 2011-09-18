@@ -56,6 +56,7 @@
 #     * Case-insensitive buffer lookup fix.
 #     * Added some bold formatting to the nicks in the responses
 #     * Made most messages optional through settings
+#     * Made on-join alert and clone report key a bit more configurable
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -64,15 +65,12 @@
 #   infolist results. 
 #
 ## TODO: 
-#   - Add option to enable/disable clone reporting (local and public)
+#   - Add option to enable/disable public clone reporting aka msg channels
 #   - Add option to enable/disable scanning on certain channels/networks
-#   - Make clones report format configurable
-#   - Make JOIN reporting optional
-#   - Add command help
+#   - Add more formatting configuration options for the clones report
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
-#   - Make output buffer optional. Allow for having the results just in 
-#     the current buffer.
+#   - Make clone_scanner buffer optional
 #   - Add optional command redirection.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
@@ -124,7 +122,16 @@ cs_settings = (
     ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
     ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
     ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
+    ("clone_report_key"),                   "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
+    ("clone_onjoin_alert_key"),             "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
 )
+def get_validated_key_from_config(setting):
+  key = weechat.config_get_plugin(setting)
+  if key != 'mask' and key != 'nick':
+    weechat.prnt("", "Key %s not found. Valid settings are 'nick' and 'mask'. Reverted the setting to 'mask'" % key)
+    weechat.config_set_plugin("clone_report_key", "mask")
+    key = "mask"
+  return key
 
 def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
@@ -146,8 +153,9 @@ def on_join_scan_cb(data, signal, signal_data):
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
-    #TODO: make match string configurable (nick, ident, hostname, ident_hostname, mask)
-    match_strings = map(lambda m: m['mask'], filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host]))
+    key = get_validated_key_from_config("clone_onjoin_alert_key")
+
+    match_strings = map(lambda m: m[key], filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host]))
     masks = ' and '.join(match_strings)
     if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
       cs_create_buffer()
@@ -237,7 +245,8 @@ def report_clones(clones, scanned_buffer_name, target_buffer=None):
     for (host, clones) in clones.iteritems():
       weechat.prnt(target_buffer, "%s is online from %s nicks:" % (host, len(clones)))
       for user in clones:
-        weechat.prnt(target_buffer, " - %s" % user['mask'])
+        key = get_validated_key_from_config("clone_report_key")
+        weechat.prnt(target_buffer, " - %s" % user[key])
   else:
     weechat.prnt(target_buffer, "No clones found on %s" % scanned_buffer_name)
 
