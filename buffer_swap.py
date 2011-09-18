@@ -5,6 +5,13 @@
 #
 #   Swaps given 2 buffers. Requested by kakazza
 #
+## Example:
+#  Swaps buffers 3 and 5
+#   /swap 3 5
+#
+#  Swaps current buffer with the #weechat buffer
+#   /swap #weechat
+#
 ## History:
 ### 2011-09-18: FiXato:
 # 
@@ -23,7 +30,6 @@
 #    client WeeChat
 #
 ## TODO: 
-#   - Possibly support buffer names instead of just numbers.
 #   - Check if given buffers exist.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
@@ -110,12 +116,17 @@ if __name__ == "__main__" and import_ok:
 
     weechat.hook_command(SCRIPT_COMMAND, 
                           SCRIPT_DESC,
-                          "[buffernumber] <buffernumber to swap with>",
+                          "[buffer] <buffer to swap with>",
                           "Swaps given buffers: \n"
-                          "/swap 3 10.\n"
+                          "the /%s command accepts anything that /buffer would accept for switching buffers\n" % SCRIPT_COMMAND
+                          "/%s 3 10\n" % SCRIPT_COMMAND
                           "would swap buffer 3 and 10 of place\n"
-                          "/swap 3.\n"
-                          "would swap current buffer with buffer number 10",
+                          "/%s 3\n" % SCRIPT_COMMAND
+                          "would swap current buffer with buffer number 10\n"
+                          "/%s 3 #weechat\n" % SCRIPT_COMMAND
+                          "would swap buffer 3 and the #weechat buffer of place\n"
+                          "/%s #weechat\n" % SCRIPT_COMMAND
+                          "would swap current buffer with the #weechat buffer",
 
                           "",
 
