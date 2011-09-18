@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# buffer_swap, version 0.2 for WeeChat version 0.3
+# buffer_swap, version 0.3 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   Swaps given 2 buffers. Requested by kakazza
@@ -15,12 +15,16 @@
 #     * Made the command example more clear that it requires 2 buffer *numbers*
 #     * After switching, now switches back to your original buffer.
 #
+# * version 0.3: current buffer support
+#     * If you only specify 1 buffer, the current buffer will be used
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
 #
 ## TODO: 
 #   - Possibly support buffer names instead of just numbers.
+#   - Check if given buffers exist.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
@@ -47,7 +51,7 @@
 #
 SCRIPT_NAME     = "buffer_swap"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.2"
+SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "Swaps given 2 buffers"
 SCRIPT_COMMAND  = "swap"
@@ -66,20 +70,28 @@ def close_cb(*kwargs):
 
 def command_main(data, buffer, args):
   args = args.split()
-  if len(args) != 2:
-    weechat.prnt("", "You need to specify 2 buffers")
-    return weechat.WEECHAT_RC_ERROR
-  
   curr_buffer = weechat.current_buffer()
   curr_buffer_number = weechat.buffer_get_integer(curr_buffer, "number")
 
-  weechat.command("", "/buffer %s" % args[0])
-  first_buffer = weechat.current_buffer()
-  first_buffer_number = weechat.buffer_get_integer(first_buffer, "number")
+  if len(args) != 1 || len(args) != 2:
+    weechat.prnt("", "You need to specify 1 or 2 buffers")
+    return weechat.WEECHAT_RC_ERROR
 
-  weechat.command("", "/buffer %s" % args[1])
-  second_buffer = weechat.current_buffer()
-  second_buffer_number = weechat.buffer_get_integer(second_buffer, "number")
+  if len(args) == 2:
+    weechat.command("", "/buffer %s" % args[0])
+    first_buffer = weechat.current_buffer()
+    first_buffer_number = weechat.buffer_get_integer(first_buffer, "number")
+
+    weechat.command("", "/buffer %s" % args[1])
+    second_buffer = weechat.current_buffer()
+    second_buffer_number = weechat.buffer_get_integer(second_buffer, "number")
+  else:
+    first_buffer = weechat.current_buffer()
+    first_buffer_number = weechat.buffer_get_integer(first_buffer, "number")
+
+    weechat.command("", "/buffer %s" % args[0])
+    second_buffer = weechat.current_buffer()
+    second_buffer_number = weechat.buffer_get_integer(second_buffer, "number")
   
   weechat.buffer_set(first_buffer, "number", str(second_buffer_number))
   weechat.buffer_set(second_buffer, "number", str(first_buffer_number))
@@ -98,10 +110,12 @@ if __name__ == "__main__" and import_ok:
 
     weechat.hook_command(SCRIPT_COMMAND, 
                           SCRIPT_DESC,
-                          "<buffernumber> <buffernumber to swap with>",
+                          "[buffernumber] <buffernumber to swap with>",
                           "Swaps given buffers: \n"
                           "/swap 3 10.\n"
-                          "would swap buffer 3 and 10 of place",
+                          "would swap buffer 3 and 10 of place\n"
+                          "/swap 3.\n"
+                          "would swap current buffer with buffer number 10",
 
                           "",
 
