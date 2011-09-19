@@ -149,6 +149,7 @@ def format_message(msg, formats, reset_color='chat'):
     else:
       end_format = reset_color
     formatted_message = "%s%s%s" % (weechat.color(format), formatted_message, weechat.color(end_format))
+  return formatted_message
 
 def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
