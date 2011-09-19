@@ -54,9 +54,11 @@
 ### 2011-09-19
 # * version 0.4: Option galore
 #     * Case-insensitive buffer lookup fix.
-#     * Added some bold formatting to the nicks in the responses
-#     * Made most messages optional through settings
-#     * Made on-join alert and clone report key a bit more configurable
+#     * Added some bold formatting to the nicks in the responses.
+#     * Made most messages optional through settings.
+#     * Made on-join alert and clone report key a bit more configurable.
+#     * Added formatting options for on-join alerts.
+#     * Added format_message helper method that accepts multiple whitespace-separated weechat.color() options.
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -124,6 +126,10 @@ cs_settings = (
     ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
     ("clone_report_key",                    "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
     ("clone_onjoin_alert_key",              "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
+    ("onjoin_alert_message_color",          "red", "The on-join clone alert's message colour. Formats are space separated."),
+    ("onjoin_alert_nick_color",             "bold red", "The on-join clone alert's nick colour. Formats are space separated."),
+    ("onjoin_alert_channel_color",          "red", "The on-join clone alert's channel colour. Formats are space separated."),
+    ("onjoin_alert_matches_color",          "bold red", "The on-join clone alert's matches (masks or nicks) colour. Formats are space separated."),
 )
 def get_validated_key_from_config(setting):
   key = weechat.config_get_plugin(setting)
@@ -132,6 +138,17 @@ def get_validated_key_from_config(setting):
     weechat.config_set_plugin("clone_report_key", "mask")
     key = "mask"
   return key
+
+def format_message(msg, formats, reset_color='chat'):
+  if type(formats) == str:
+    formats = formats.split()
+  formatted_message = msg
+  for format in formats:
+    if format in ['bold', 'reverse', 'italic', 'underline']:
+      end_format = '-%s' % format
+    else:
+      end_format = reset_color
+    formatted_message = "%s%s%s" % (weechat.color(format), formatted_message, weechat.color(end_format))
 
 def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
@@ -149,25 +166,32 @@ def on_join_scan_cb(data, signal, signal_data):
 
   if weechat.config_get_plugin("display_join_messages") == "on":
     cs_create_buffer()
-    weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (bold(joined_nick), parsed_ident_host, network_chan_name))
+    weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (format_message(joined_nick,"bold"), parsed_ident_host, network_chan_name))
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
     key = get_validated_key_from_config("clone_onjoin_alert_key")
 
-    match_strings = map(lambda m: m[key], filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host]))
-    masks = ' and '.join(match_strings)
+    filtered_clones = filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host])
+    match_strings = map(lambda m: format_message(m[key], weechat.config_get_plugin("onjoin_alert_matches_color")), filtered_clones)
+
+    join_string = format_message(' and ',weechat.config_get_plugin("onjoin_alert_message_color"))
+    masks = join_string.join(match_strings)
+    message = "%s %s %s %s %s" % (
+      format_message(joined_nick, weechat.config_get_plugin("onjoin_alert_nick_color")),
+      format_message("is already on", weechat.config_get_plugin("onjoin_alert_message_color")),
+      format_message(network_chan_name, weechat.config_get_plugin("onjoin_alert_channel_color")),
+      format_message("as", weechat.config_get_plugin("onjoin_alert_message_color")),
+      masks)
+
     if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
       cs_create_buffer()
-      weechat.prnt(cs_buffer,"%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
+      weechat.prnt(cs_buffer,message)
     if weechat.config_get_plugin("display_onjoin_alert_target_buffer") == "on":
-      weechat.prnt(chan_buffer,"%s%s is already on the channel as %s" % (weechat.color("red"), bold(joined_nick), masks))
+      weechat.prnt(chan_buffer, message)
     if weechat.config_get_plugin("display_onjoin_alert_current_buffer") == "on":
-      weechat.prnt(weechat.current_buffer(),"%s%s is already on %s as %s" % (weechat.color("red"), bold(joined_nick), network_chan_name, masks))
+      weechat.prnt(weechat.current_buffer(),message)
   return weechat.WEECHAT_RC_OK
-
-def bold(str):
-  return "%s%s%s" % (weechat.color("bold"), str, weechat.color("-bold"))
 
 # Create debug buffer.
 def cs_create_buffer():
@@ -223,7 +247,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
     nick = weechat.infolist_string(infolist, "name")
     matches[hostname].append({
       'nick': nick,
-      'mask': "%s!%s" % (bold(nick), ident_hostname),
+      'mask': "%s!%s" % (format_message(nick, 'bold'), ident_hostname),
       'ident': host_matchdata.group(1),
       'ident_hostname': ident_hostname,
       'hostname': hostname,
