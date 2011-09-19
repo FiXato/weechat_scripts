@@ -143,12 +143,16 @@ def format_message(msg, formats, reset_color='chat'):
   if type(formats) == str:
     formats = formats.split()
   formatted_message = msg
+  needs_color_reset = False
   for format in formats:
     if format in ['bold', 'reverse', 'italic', 'underline']:
       end_format = '-%s' % format
     else:
-      end_format = reset_color
+      needs_color_reset = True
+      end_format = ""
     formatted_message = "%s%s%s" % (weechat.color(format), formatted_message, weechat.color(end_format))
+  if needs_color_reset:
+    formatted_message += weechat.color(reset_color)
   return formatted_message
 
 def on_join_scan_cb(data, signal, signal_data):
