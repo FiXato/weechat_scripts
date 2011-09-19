@@ -60,6 +60,7 @@
 #     * Added format_message helper method that accepts multiple whitespace-separated weechat.color() options.
 #     * Added formatting options for join messages
 #     * Added formatting options for clone reports
+#     * Added format_from_config helper method that reads the given formatting key from the config
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -177,6 +178,9 @@ def format_message(msg, formats, reset_color='chat'):
     formatted_message += weechat.color(reset_color)
   return formatted_message
 
+def format_from_config(msg, config_option):
+  return format_message(msg, config_get_plugin(config_option))
+
 def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
   network = signal.split(',')[0]
@@ -193,13 +197,15 @@ def on_join_scan_cb(data, signal, signal_data):
 
   if weechat.config_get_plugin("display_join_messages") == "on":
     cs_create_buffer()
-    message = format_message("%s%s%s%s%s" % (
-      format_message(joined_nick, weechat.config_get_plugin("colors.join_messages.nick")),
-      format_message("!", weechat.config_get_plugin("colors.join_messages.message")),
-      format_message(parsed_ident_host, weechat.config_get_plugin("colors.join_messages.identhost")),
-      format_message(" JOINed ", weechat.config_get_plugin("colors.join_messages.message")),
-      format_message(network_chan_name, weechat.config_get_plugin("colors.join_messages.channel")),
-    ), weechat.config_get_plugin("colors.join_messages.channel"))
+    message = "%s%s%s%s%s" % (
+      format_from_config(joined_nick, "colors.join_messages.nick"),
+      format_from_config("!", "colors.join_messages.message"),
+      format_from_config(parsed_ident_host, "colors.join_messages.identhost"),
+      format_from_config(" JOINed ", "colors.join_messages.message"),
+      format_from_config(network_chan_name, "colors.join_messages.channel"),
+    )
+    #Make sure message format is also applied if no formatting is given for nick
+    message = format_from_config(message, "colors.join_messages.message")
     weechat.prnt(cs_buffer, message)
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
@@ -207,17 +213,18 @@ def on_join_scan_cb(data, signal, signal_data):
     key = get_validated_key_from_config("clone_onjoin_alert_key")
 
     filtered_clones = filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host])
-    match_strings = map(lambda m: format_message(m[key], weechat.config_get_plugin("colors.onjoin_alert.matches")), filtered_clones)
+    match_strings = map(lambda m: format_from_config(m[key], "colors.onjoin_alert.matches"), filtered_clones)
 
-    join_string = format_message(' and ',weechat.config_get_plugin("colors.onjoin_alert.message"))
+    join_string = format_from_config(' and ',"colors.onjoin_alert.message")
     masks = join_string.join(match_strings)
-    message = format_message("%s %s %s %s %s" % (
-      format_message(joined_nick, weechat.config_get_plugin("colors.onjoin_alert.nick")),
-      format_message("is already on", weechat.config_get_plugin("colors.onjoin_alert.message")),
-      format_message(network_chan_name, weechat.config_get_plugin("colors.onjoin_alert.channel")),
-      format_message("as", weechat.config_get_plugin("colors.onjoin_alert.message")),
+    message = "%s %s %s %s %s" % (
+      format_from_config(joined_nick, "colors.onjoin_alert.nick"),
+      format_from_config("is already on", "colors.onjoin_alert.message"),
+      format_from_config(network_chan_name, "colors.onjoin_alert.channel"),
+      format_from_config("as", "colors.onjoin_alert.message"),
       masks
-    ), weechat.config_get_plugin("colors.onjoin_alert.message"))
+    )
+    message = format_from_config(message, weechat.config_get_plugin("colors.onjoin_alert.message"))
 
     if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
       cs_create_buffer()
@@ -283,8 +290,8 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
     matches[hostname].append({
       'nick': nick,
       'mask': "%s!%s" % (
-        format_message(nick, weechat.config_get_plugin("colors.mask.nick")), 
-        format_message(ident_hostname, weechat.config_get_plugin("colors.mask.identhost"))),
+        format_from_config(nick, "colors.mask.nick"), 
+        format_from_config(ident_hostname, "colors.mask.identhost")),
       'ident': host_matchdata.group(1),
       'ident_hostname': ident_hostname,
       'hostname': hostname,
@@ -302,29 +309,29 @@ def report_clones(clones, scanned_buffer_name, target_buffer=None):
     target_buffer = cs_buffer
 
   if clones:
-    clone_report_header = format_message("%s %s %s%s" % (
-      format_message(len(clones), weechat.config_get_plugin("colors.clone_report.header.number_of_hosts")),
-      format_message("hosts with clones were found on", weechat.config_get_plugin("colors.clone_report.header.message")),
-      format_message(scanned_buffer_name, weechat.config_get_plugin("colors.clone_report.header.channel")),
-      format_message(":", weechat.config_get_plugin("colors.clone_report.header.message")),
-    ), weechat.config_get_plugin("colors.clone_report.header.message"))
+    clone_report_header = "%s %s %s%s" % (
+      format_from_config(len(clones), "colors.clone_report.header.number_of_hosts"),
+      format_from_config("hosts with clones were found on", "colors.clone_report.header.message"),
+      format_from_config(scanned_buffer_name, "colors.clone_report.header.channel"),
+      format_from_config(":", "colors.clone_report.header.message"),
+    )
+    clone_report_header = format_from_config(clone_report_header, "colors.clone_report.header.message")
     weechat.prnt(target_buffer, clone_report_header)
 
     for (host, clones) in clones.iteritems():
-      host_message = format_message("%s %s %s %s" % (
-        format_message(host, weechat.config_get_plugin("colors.clone_report.subheader.host")),
-        format_message("is online from", weechat.config_get_plugin("colors.clone_report.subheader.message")),
-        format_message(len(clones), weechat.config_get_plugin("colors.clone_report.subheader.number_of_clones")),
-        format_message("nicks:", weechat.config_get_plugin("colors.clone_report.subheader.message")),
-      ), weechat.config_get_plugin("colors.clone_report.subheader.message"))
+      host_message = "%s %s %s %s" % (
+        format_from_config(host, "colors.clone_report.subheader.host"),
+        format_from_config("is online from", "colors.clone_report.subheader.message"),
+        format_from_config(len(clones), "colors.clone_report.subheader.number_of_clones"),
+        format_from_config("nicks:", "colors.clone_report.subheader.message"),
+      )
+      host_message = format_from_config(host_message, "colors.clone_report.subheader.message")
       weechat.prnt(target_buffer, host_message)
 
       for user in clones:
         key = get_validated_key_from_config("clone_report_key")
-        clone_message = format_message("%s%s" % (
-          " - ", 
-          format_message(user[key], weechat.config_get_plugin("colors.clone_report.clone.match"))
-        ), weechat.config_get_plugin("colors.clone_report.clone.message"))
+        clone_message = "%s%s" % (" - ", format_from_config(user[key], "colors.clone_report.clone.match"))
+        clone_message = format_from_config(clone_message,"colors.clone_report.clone.message")
         weechat.prnt(target_buffer, clone_message)
   else:
     weechat.prnt(target_buffer, "No clones found on %s" % scanned_buffer_name)
