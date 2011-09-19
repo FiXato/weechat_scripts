@@ -138,9 +138,16 @@ cs_settings = (
   ("colors.join_messages.identhost",  "chat", "The colour for the 'ident@host'-part of the join messages."),
   ("colors.join_messages.channel",    "bold", "The colour for the 'channel'-part of the join messages."),
 
-  ("colors.clone_report.header.message",          "bold", "The colour of the clone report header."),
+  ("colors.clone_report.header.message",          "chat", "The colour of the clone report header."),
   ("colors.clone_report.header.number_of_hosts",  "bold", "The colour of the number of hosts in the clone report header."),
   ("colors.clone_report.header.channel",          "bold", "The colour of the channel name in the clone report header."),
+
+  ("colors.clone_report.subheader.message",        "chat", "The colour of the clone report subheader."),
+  ("colors.clone_report.subheader.host",              "bold", "The colour of the host in the clone report subheader."),
+  ("colors.clone_report.subheader.number_of_clones",  "bold", "The colour of the number of clones in the clone report subheader."),
+  
+  ("colors.clone_report.clone.message", "chat", "The colour of the clone hit in the clone report message."),
+  ("colors.clone_report.clone.match",   "chat", "The colour of the match details (masks or nicks) in the clone report."),
 )
 
 def get_validated_key_from_config(setting):
