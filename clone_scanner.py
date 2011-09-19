@@ -54,12 +54,12 @@
 ### 2011-09-19
 # * version 0.4: Option galore
 #     * Case-insensitive buffer lookup fix.
-#     * Added some bold formatting to the nicks in the responses.
 #     * Made most messages optional through settings.
 #     * Made on-join alert and clone report key a bit more configurable.
 #     * Added formatting options for on-join alerts.
 #     * Added format_message helper method that accepts multiple whitespace-separated weechat.color() options.
 #     * Added formatting options for join messages
+#     * Added formatting options for clone reports
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -70,7 +70,6 @@
 ## TODO: 
 #   - Add option to enable/disable public clone reporting aka msg channels
 #   - Add option to enable/disable scanning on certain channels/networks
-#   - Add more formatting configuration options for the clones report
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
 #   - Make clone_scanner buffer optional
@@ -125,16 +124,23 @@ cs_settings = (
   ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
   ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
   ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
+
   ("clone_report_key",                    "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
   ("clone_onjoin_alert_key",              "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
-  ("onjoin_alert_message_color",          "red", "The on-join clone alert's message colour. Formats are space separated."),
-  ("onjoin_alert_nick_color",             "bold red", "The on-join clone alert's nick colour. Formats are space separated. Note: if you have colorize_nicks, this option might not work as expected."),
-  ("onjoin_alert_channel_color",          "red", "The on-join clone alert's channel colour. Formats are space separated."),
-  ("onjoin_alert_matches_color",          "bold red", "The on-join clone alert's matches (masks or nicks) colour. Formats are space separated. Note: if you have colorize_nicks, this option might not work as expected."),
-  ("join_messages_message_color",         "chat", "The base colour for the join messages."),
-  ("join_messages_nick_color",            "bold", "The colour for the 'nick'-part of the join messages. Note: if you have colorize_nicks, this option might not always work as expected."),
-  ("join_messages_identhost_color",       "chat", "The colour for the 'ident@host'-part of the join messages."),
-  ("join_messages_channel_color",         "bold", "The colour for the 'ident@host'-part of the join messages."),
+
+  ("colors.onjoin_alert.message",   "red", "The on-join clone alert's message colour. Formats are space separated."),
+  ("colors.onjoin_alert.nick",      "bold red", "The on-join clone alert's nick colour. Formats are space separated. Note: if you have colorize_nicks, this option might not work as expected."),
+  ("colors.onjoin_alert.channel",   "red", "The on-join clone alert's channel colour. Formats are space separated."),
+  ("colors.onjoin_alert.matches",   "bold red", "The on-join clone alert's matches (masks or nicks) colour. Formats are space separated. Note: if you have colorize_nicks, this option might not work as expected."),
+
+  ("colors.join_messages.message",    "chat", "The base colour for the join messages."),
+  ("colors.join_messages.nick",       "bold", "The colour for the 'nick'-part of the join messages. Note: if you have colorize_nicks, this option might not always work as expected."),
+  ("colors.join_messages.identhost",  "chat", "The colour for the 'ident@host'-part of the join messages."),
+  ("colors.join_messages.channel",    "bold", "The colour for the 'channel'-part of the join messages."),
+
+  ("colors.clone_report.header.message",          "bold", "The colour of the clone report header."),
+  ("colors.clone_report.header.number_of_hosts",  "bold", "The colour of the number of hosts in the clone report header."),
+  ("colors.clone_report.header.channel",          "bold", "The colour of the channel name in the clone report header."),
 )
 
 def get_validated_key_from_config(setting):
@@ -177,13 +183,13 @@ def on_join_scan_cb(data, signal, signal_data):
 
   if weechat.config_get_plugin("display_join_messages") == "on":
     cs_create_buffer()
-    message = "%s%s%s%s%s" % (
-      format_message(joined_nick, weechat.config_get_plugin("join_messages_nick_color")),
-      format_message("!", weechat.config_get_plugin("join_messages_message_color")),
-      format_message(parsed_ident_host, weechat.config_get_plugin("join_messages_identhost_color")),
-      format_message(" JOINed ", weechat.config_get_plugin("join_messages_message_color")),
-      format_message(network_chan_name, weechat.config_get_plugin("join_messages_channel_color")),
-    )
+    message = format_message("%s%s%s%s%s" % (
+      format_message(joined_nick, weechat.config_get_plugin("colors.join_messages.nick")),
+      format_message("!", weechat.config_get_plugin("colors.join_messages.message")),
+      format_message(parsed_ident_host, weechat.config_get_plugin("colors.join_messages.identhost")),
+      format_message(" JOINed ", weechat.config_get_plugin("colors.join_messages.message")),
+      format_message(network_chan_name, weechat.config_get_plugin("colors.join_messages.channel")),
+    ), weechat.config_get_plugin("colors.join_messages.channel"))
     weechat.prnt(cs_buffer, message)
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
@@ -191,16 +197,17 @@ def on_join_scan_cb(data, signal, signal_data):
     key = get_validated_key_from_config("clone_onjoin_alert_key")
 
     filtered_clones = filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host])
-    match_strings = map(lambda m: format_message(m[key], weechat.config_get_plugin("onjoin_alert_matches_color")), filtered_clones)
+    match_strings = map(lambda m: format_message(m[key], weechat.config_get_plugin("colors.onjoin_alert.matches")), filtered_clones)
 
-    join_string = format_message(' and ',weechat.config_get_plugin("onjoin_alert_message_color"))
+    join_string = format_message(' and ',weechat.config_get_plugin("colors.onjoin_alert.message"))
     masks = join_string.join(match_strings)
-    message = "%s %s %s %s %s" % (
-      format_message(joined_nick, weechat.config_get_plugin("onjoin_alert_nick_color")),
-      format_message("is already on", weechat.config_get_plugin("onjoin_alert_message_color")),
-      format_message(network_chan_name, weechat.config_get_plugin("onjoin_alert_channel_color")),
-      format_message("as", weechat.config_get_plugin("onjoin_alert_message_color")),
-      masks)
+    message = format_message("%s %s %s %s %s" % (
+      format_message(joined_nick, weechat.config_get_plugin("colors.onjoin_alert.nick")),
+      format_message("is already on", weechat.config_get_plugin("colors.onjoin_alert.message")),
+      format_message(network_chan_name, weechat.config_get_plugin("colors.onjoin_alert.channel")),
+      format_message("as", weechat.config_get_plugin("colors.onjoin_alert.message")),
+      masks
+    ), weechat.config_get_plugin("colors.onjoin_alert.message"))
 
     if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
       cs_create_buffer()
@@ -283,12 +290,30 @@ def report_clones(clones, scanned_buffer_name, target_buffer=None):
     target_buffer = cs_buffer
 
   if clones:
-    weechat.prnt(target_buffer, "%s hosts with clones were found on %s:" % (len(clones), scanned_buffer_name))
+    clone_report_header = format_message("%s %s %s%s" % (
+      format_message(len(clones), weechat.config_get_plugin("colors.clone_report.header.number_of_hosts")),
+      format_message("hosts with clones were found on", weechat.config_get_plugin("colors.clone_report.header.message")),
+      format_message(scanned_buffer_name, weechat.config_get_plugin("colors.clone_report.header.channel")),
+      format_message(":", weechat.config_get_plugin("colors.clone_report.header.message")),
+    ), weechat.config_get_plugin("colors.clone_report.header.message"))
+    weechat.prnt(target_buffer, clone_report_header)
+
     for (host, clones) in clones.iteritems():
-      weechat.prnt(target_buffer, "%s is online from %s nicks:" % (host, len(clones)))
+      host_message = format_message("%s %s %s %s" % (
+        format_message(host, weechat.config_get_plugin("colors.clone_report.subheader.host")),
+        format_message("is online from", weechat.config_get_plugin("colors.clone_report.subheader.message")),
+        format_message(len(clones), weechat.config_get_plugin("colors.clone_report.subheader.number_of_clones")),
+        format_message("nicks", weechat.config_get_plugin("colors.clone_report.subheader.message")),
+      ), weechat.config_get_plugin("colors.clone_report.subheader.message"))
+      weechat.prnt(target_buffer, host_message)
+
       for user in clones:
         key = get_validated_key_from_config("clone_report_key")
-        weechat.prnt(target_buffer, " - %s" % user[key])
+        clone_message = format_message("%s%s" % (
+          " - ", 
+          format_message(user[key], weechat.config_get_plugin("colors.clone_report.clone.match"))
+        ), weechat.config_get_plugin("colors.clone_report.clone.message"))
+        weechat.prnt(target_buffer, clone_message)
   else:
     weechat.prnt(target_buffer, "No clones found on %s" % scanned_buffer_name)
 
