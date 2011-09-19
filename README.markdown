@@ -9,11 +9,20 @@ Scripts I've written to add features to WeeChat I felt were missing.
 
 * clone_scanner.py
 
-    Detect if a joining user is a clone or not.
+    A Clone Scanner that can manually scan channels and automatically scans 
+    joins for users on the channel with multiple nicknames from the same host.
 
 * listbuffer.py (for now still developed in its own repository)
 
     Show /list results in a common buffer and interact with them.
+
+* buffer_swap.py
+
+    Swap two buffers' positions. A feature requested by Kakazza in #weechat. 
+    `/swap [buffer] <buffer to swap with>`
+
+    Example: 
+    `/swap #weechat #weechat-fr`
 
 ## Script ideas
 * Task https://savannah.nongnu.org/task/index.php?11351
@@ -21,7 +30,7 @@ Scripts I've written to add features to WeeChat I felt were missing.
 
     (Custom (s)notices buffer)
 
-* bufferstats:
+* buffer_stats:
 
     Output stats about the number of different buffers. Something like:
 
