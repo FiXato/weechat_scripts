@@ -59,6 +59,7 @@
 #     * Made on-join alert and clone report key a bit more configurable.
 #     * Added formatting options for on-join alerts.
 #     * Added format_message helper method that accepts multiple whitespace-separated weechat.color() options.
+#     * Added formatting options for join messages
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -117,20 +118,25 @@ except ImportError:
 import re
 cs_buffer = None
 cs_settings = (
-    ("display_join_messages",               "off", "Display all joins in the clone_scanner buffer"),
-    ("display_onjoin_alert_clone_buffer",   "on", "Display an on-join clone alert in the clone_scanner buffer"),
-    ("display_onjoin_alert_target_buffer",  "on", "Display an on-join clone alert in the buffer where the clone was detected"),
-    ("display_onjoin_alert_current_buffer", "off", "Display an on-join clone alert in the current buffer"),
-    ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
-    ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
-    ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
-    ("clone_report_key",                    "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
-    ("clone_onjoin_alert_key",              "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
-    ("onjoin_alert_message_color",          "red", "The on-join clone alert's message colour. Formats are space separated."),
-    ("onjoin_alert_nick_color",             "bold red", "The on-join clone alert's nick colour. Formats are space separated."),
-    ("onjoin_alert_channel_color",          "red", "The on-join clone alert's channel colour. Formats are space separated."),
-    ("onjoin_alert_matches_color",          "bold red", "The on-join clone alert's matches (masks or nicks) colour. Formats are space separated."),
+  ("display_join_messages",               "off", "Display all joins in the clone_scanner buffer"),
+  ("display_onjoin_alert_clone_buffer",   "on", "Display an on-join clone alert in the clone_scanner buffer"),
+  ("display_onjoin_alert_target_buffer",  "on", "Display an on-join clone alert in the buffer where the clone was detected"),
+  ("display_onjoin_alert_current_buffer", "off", "Display an on-join clone alert in the current buffer"),
+  ("display_scan_report_clone_buffer",    "on", "Display manual scan reports in the clone buffer"),
+  ("display_scan_report_target_buffer",   "off", "Display manual scan reports in the buffer of the scanned channel"),
+  ("display_scan_report_current_buffer",  "on", "Display manual scan reports in the current buffer"),
+  ("clone_report_key",                    "mask", "Which 'key' to display in the clone report: 'mask' for full hostmasks, or 'nick' for nicks"),
+  ("clone_onjoin_alert_key",              "mask", "Which 'key' to display in the on-join alerts: 'mask' for full hostmasks, or 'nick' for nicks"),
+  ("onjoin_alert_message_color",          "red", "The on-join clone alert's message colour. Formats are space separated."),
+  ("onjoin_alert_nick_color",             "bold red", "The on-join clone alert's nick colour. Formats are space separated. Note: if you have colorize_nicks, this option might not work as expected."),
+  ("onjoin_alert_channel_color",          "red", "The on-join clone alert's channel colour. Formats are space separated."),
+  ("onjoin_alert_matches_color",          "bold red", "The on-join clone alert's matches (masks or nicks) colour. Formats are space separated. Note: if you have colorize_nicks, this option might not work as expected."),
+  ("join_messages_message_color",         "chat", "The base colour for the join messages."),
+  ("join_messages_nick_color",            "bold", "The colour for the 'nick'-part of the join messages. Note: if you have colorize_nicks, this option might not always work as expected."),
+  ("join_messages_identhost_color",       "chat", "The colour for the 'ident@host'-part of the join messages."),
+  ("join_messages_channel_color",         "bold", "The colour for the 'ident@host'-part of the join messages."),
 )
+
 def get_validated_key_from_config(setting):
   key = weechat.config_get_plugin(setting)
   if key != 'mask' and key != 'nick':
@@ -171,7 +177,14 @@ def on_join_scan_cb(data, signal, signal_data):
 
   if weechat.config_get_plugin("display_join_messages") == "on":
     cs_create_buffer()
-    weechat.prnt(cs_buffer, "%s!%s JOINed %s" % (format_message(joined_nick,"bold"), parsed_ident_host, network_chan_name))
+    message = "%s%s%s%s%s" % (
+      format_message(joined_nick, weechat.config_get_plugin("join_messages_nick_color")),
+      format_message("!", weechat.config_get_plugin("join_messages_message_color")),
+      format_message(parsed_ident_host, weechat.config_get_plugin("join_messages_identhost_color")),
+      format_message(" JOINed ", weechat.config_get_plugin("join_messages_message_color"))
+      format_message(network_chan_name, weechat.config_get_plugin("join_messages_channel_color")),
+    )
+    weechat.prnt(cs_buffer, message)
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
