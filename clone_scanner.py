@@ -179,7 +179,7 @@ def format_message(msg, formats, reset_color='chat'):
   return formatted_message
 
 def format_from_config(msg, config_option):
-  return format_message(msg, config_get_plugin(config_option))
+  return format_message(msg, weechat.config_get_plugin(config_option))
 
 def on_join_scan_cb(data, signal, signal_data):
   global cs_buffer
