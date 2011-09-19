@@ -310,7 +310,7 @@ def report_clones(clones, scanned_buffer_name, target_buffer=None):
         format_message(host, weechat.config_get_plugin("colors.clone_report.subheader.host")),
         format_message("is online from", weechat.config_get_plugin("colors.clone_report.subheader.message")),
         format_message(len(clones), weechat.config_get_plugin("colors.clone_report.subheader.number_of_clones")),
-        format_message("nicks", weechat.config_get_plugin("colors.clone_report.subheader.message")),
+        format_message("nicks:", weechat.config_get_plugin("colors.clone_report.subheader.message")),
       ), weechat.config_get_plugin("colors.clone_report.subheader.message"))
       weechat.prnt(target_buffer, host_message)
 
