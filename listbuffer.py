@@ -62,6 +62,7 @@
 #   - Add filter support a la iset
 #   - Allow selecting multiple channels
 #   - Sort by integer for user count
+#   - Add optional command redirection.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>

@@ -77,7 +77,6 @@
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
 #   - Make clone_scanner buffer optional
-#   - Add optional command redirection.
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
