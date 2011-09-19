@@ -63,7 +63,7 @@
 #     * Added format_from_config helper method that reads the given formatting key from the config
 #
 # * version 0.5: cs_buffer refactoring
-#     * dropping the manual cs_create_buffer call in favor for a cs_buffer() method
+#     * dropping the manual cs_create_buffer call in favor for a cs_get_buffer() method
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -207,7 +207,7 @@ def on_join_scan_cb(data, signal, signal_data):
     )
     #Make sure message format is also applied if no formatting is given for nick
     message = format_from_config(message, "colors.join_messages.message")
-    weechat.prnt(cs_buffer(), message)
+    weechat.prnt(cs_get_buffer(), message)
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
@@ -228,14 +228,14 @@ def on_join_scan_cb(data, signal, signal_data):
     message = format_from_config(message, weechat.config_get_plugin("colors.onjoin_alert.message"))
 
     if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
-      weechat.prnt(cs_buffer(),message)
+      weechat.prnt(cs_get_buffer(),message)
     if weechat.config_get_plugin("display_onjoin_alert_target_buffer") == "on":
       weechat.prnt(chan_buffer, message)
     if weechat.config_get_plugin("display_onjoin_alert_current_buffer") == "on":
       weechat.prnt(weechat.current_buffer(),message)
   return weechat.WEECHAT_RC_OK
 
-def cs_buffer():
+def cs_get_buffer():
   global cs_buffer
 
   if not cs_buffer:
@@ -306,7 +306,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
 def report_clones(clones, scanned_buffer_name, target_buffer=None):
   # Default to clone_scanner buffer
   if not target_buffer:
-    target_buffer = cs_buffer()
+    target_buffer = cs_get_buffer()
 
   if clones:
     clone_report_header = "%s %s %s%s" % (
@@ -366,7 +366,7 @@ if __name__ == "__main__" and import_ok:
     cs_set_default_settings()
 
     cs_buffer = weechat.buffer_search("python", "clone_scanner")
-    cs_buffer()
+    cs_get_buffer()
 
     weechat.hook_signal("*,irc_in2_join", "on_join_scan_cb", "")
 
