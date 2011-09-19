@@ -181,7 +181,7 @@ def on_join_scan_cb(data, signal, signal_data):
       format_message(joined_nick, weechat.config_get_plugin("join_messages_nick_color")),
       format_message("!", weechat.config_get_plugin("join_messages_message_color")),
       format_message(parsed_ident_host, weechat.config_get_plugin("join_messages_identhost_color")),
-      format_message(" JOINed ", weechat.config_get_plugin("join_messages_message_color"))
+      format_message(" JOINed ", weechat.config_get_plugin("join_messages_message_color")),
       format_message(network_chan_name, weechat.config_get_plugin("join_messages_channel_color")),
     )
     weechat.prnt(cs_buffer, message)
