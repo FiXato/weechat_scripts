@@ -148,6 +148,9 @@ cs_settings = (
   
   ("colors.clone_report.clone.message", "chat", "The colour of the clone hit in the clone report message."),
   ("colors.clone_report.clone.match",   "chat", "The colour of the match details (masks or nicks) in the clone report."),
+
+  ("colors.mask.nick",      "bold", "The formatting of the nick in the match mask."),
+  ("colors.mask.identhost", "", "The formatting of the identhost in the match mask."),
 )
 
 def get_validated_key_from_config(setting):
@@ -279,7 +282,9 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
     nick = weechat.infolist_string(infolist, "name")
     matches[hostname].append({
       'nick': nick,
-      'mask': "%s!%s" % (format_message(nick, 'bold'), ident_hostname),
+      'mask': "%s!%s" % (
+        format_message(nick, weechat.config_get_plugin("colors.mask.nick")), 
+        format_message(ident_hostname, weechat.config_get_plugin("colors.mask.identhostname"))),
       'ident': host_matchdata.group(1),
       'ident_hostname': ident_hostname,
       'hostname': hostname,
