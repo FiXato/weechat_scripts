@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 0.4 for WeeChat version 0.3
+# Clone Scanner, version 0.5 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -62,6 +62,9 @@
 #     * Added formatting options for clone reports
 #     * Added format_from_config helper method that reads the given formatting key from the config
 #
+# * version 0.5: cs_buffer refactoring
+#     * dropping the manual cs_create_buffer call in favor for a cs_buffer() method
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
@@ -101,7 +104,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.4"
+SCRIPT_VERSION  = "0.5"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -182,7 +185,6 @@ def format_from_config(msg, config_option):
   return format_message(msg, weechat.config_get_plugin(config_option))
 
 def on_join_scan_cb(data, signal, signal_data):
-  global cs_buffer
   network = signal.split(',')[0]
   joined_nick = weechat.info_get("irc_nick_from_host", signal_data)
   join_match_data = re.match(':[^!]+!([^@]+@(\S+)) JOIN :?(#\S+)', signal_data)
@@ -196,7 +198,6 @@ def on_join_scan_cb(data, signal, signal_data):
     return weechat.WEECHAT_RC_OK
 
   if weechat.config_get_plugin("display_join_messages") == "on":
-    cs_create_buffer()
     message = "%s%s%s%s%s" % (
       format_from_config(joined_nick, "colors.join_messages.nick"),
       format_from_config("!", "colors.join_messages.message"),
@@ -206,7 +207,7 @@ def on_join_scan_cb(data, signal, signal_data):
     )
     #Make sure message format is also applied if no formatting is given for nick
     message = format_from_config(message, "colors.join_messages.message")
-    weechat.prnt(cs_buffer, message)
+    weechat.prnt(cs_buffer(), message)
 
   clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
   if clones:
@@ -227,16 +228,14 @@ def on_join_scan_cb(data, signal, signal_data):
     message = format_from_config(message, weechat.config_get_plugin("colors.onjoin_alert.message"))
 
     if weechat.config_get_plugin("display_onjoin_alert_clone_buffer") == "on":
-      cs_create_buffer()
-      weechat.prnt(cs_buffer,message)
+      weechat.prnt(cs_buffer(),message)
     if weechat.config_get_plugin("display_onjoin_alert_target_buffer") == "on":
       weechat.prnt(chan_buffer, message)
     if weechat.config_get_plugin("display_onjoin_alert_current_buffer") == "on":
       weechat.prnt(weechat.current_buffer(),message)
   return weechat.WEECHAT_RC_OK
 
-# Create debug buffer.
-def cs_create_buffer():
+def cs_buffer():
   global cs_buffer
 
   if not cs_buffer:
@@ -247,9 +246,13 @@ def cs_create_buffer():
     weechat.buffer_set(cs_buffer, "notify", "0")
     weechat.buffer_set(cs_buffer, "nicklist", "0")
 
+  return cs_buffer
+
 def cs_close_cb(*kwargs):
   """ A callback for buffer closing. """
   global cs_buffer
+
+  #TODO: Ensure the clone_scanner buffer gets closed if its option is set and the script unloads
 
   cs_buffer = None
   return weechat.WEECHAT_RC_OK
@@ -269,7 +272,6 @@ def get_channel_from_buffer_args(buffer, args):
   return server_name, channel_name
 
 def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
-  global cs_buffer
   matches = {}
   infolist = weechat.infolist_get("irc_nick", "", infolist_buffer_name)
   while(weechat.infolist_next(infolist)):
@@ -304,9 +306,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
 def report_clones(clones, scanned_buffer_name, target_buffer=None):
   # Default to clone_scanner buffer
   if not target_buffer:
-    cs_create_buffer()
-    global cs_buffer
-    target_buffer = cs_buffer
+    target_buffer = cs_buffer()
 
   if clones:
     clone_report_header = "%s %s %s%s" % (
@@ -366,7 +366,7 @@ if __name__ == "__main__" and import_ok:
     cs_set_default_settings()
 
     cs_buffer = weechat.buffer_search("python", "clone_scanner")
-    cs_create_buffer()
+    cs_buffer()
 
     weechat.hook_signal("*,irc_in2_join", "on_join_scan_cb", "")
 
