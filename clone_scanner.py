@@ -284,7 +284,7 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
       'nick': nick,
       'mask': "%s!%s" % (
         format_message(nick, weechat.config_get_plugin("colors.mask.nick")), 
-        format_message(ident_hostname, weechat.config_get_plugin("colors.mask.identhostname"))),
+        format_message(ident_hostname, weechat.config_get_plugin("colors.mask.identhost"))),
       'ident': host_matchdata.group(1),
       'ident_hostname': ident_hostname,
       'hostname': hostname,
