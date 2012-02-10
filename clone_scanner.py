@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 0.5 for WeeChat version 0.3
+# Clone Scanner, version 0.6 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -65,6 +65,12 @@
 # * version 0.5: cs_buffer refactoring
 #     * dropping the manual cs_create_buffer call in favor for a cs_get_buffer() method
 #
+### 2012-02-10: FiXato:
+#
+# * version 0.6: Stop shoving that buffer in my face!
+#     * The clone_scanner buffer should no longer pop up by itself when you load the script.
+#       It should only pop up now when you actually a line needs to show up in the buffer.
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
@@ -103,7 +109,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.5"
+SCRIPT_VERSION  = "0.6"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -363,10 +369,7 @@ if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, SCRIPT_CLOSE_CB, ""):
     cs_set_default_settings()
-
     cs_buffer = weechat.buffer_search("python", "clone_scanner")
-    cs_get_buffer()
-
     weechat.hook_signal("*,irc_in2_join", "on_join_scan_cb", "")
 
     weechat.hook_command(SCRIPT_COMMAND, 
