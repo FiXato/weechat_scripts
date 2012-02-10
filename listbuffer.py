@@ -109,7 +109,7 @@ try:
 except ImportError:
   print "This script must be run under WeeChat."
   import_ok = False
-  
+
 import re
 
 lb_buffer = None
@@ -128,11 +128,10 @@ lb_sort_options = (
 #                              server numeric Nick Chan  Users     Modes    Topic
 lb_channel_list_expression = '(:\S+) (\d{3}) (\S+) (\S+) (\d+) :(\[(.*?)\] )?(.*)'
 
-
 # Create listbuffer.
 def lb_create_buffer():
   global lb_buffer, lb_curline
-  
+
   if not lb_buffer:
     # Sets notify to 0 as this buffer does not need to be in hotlist.
     lb_buffer = weechat.buffer_new("listbuffer", "lb_input_cb", \
@@ -166,18 +165,17 @@ def lb_list_start(data, signal, message):
 
 def lb_initialise_list(signal):
   global lb_channels, lb_network, lb_list_started
-  
+
   lb_create_buffer()
   lb_channels = []
   lb_network = signal.split(',')[0]
   lb_list_started = True
-  
   return
 
 
 def lb_list_chan(data, signal, message):
   global lb_channels, lb_buffer, lb_list_started
-  
+
   # Work-around for IRCds which don't send 321 Numeric (/List start)
   if not lb_list_started:
     lb_initialise_list(signal)
@@ -195,34 +193,30 @@ def lb_list_chan(data, signal, message):
     })
   return weechat.WEECHAT_RC_OK
 
-
 def lb_list_end(data, signal, message):
   global lb_list_started
-  
+
   # Work-around for IRCds which don't send 321 Numeric (/List start)
   if not lb_list_started:
     lb_initialise_list(signal)
-    
+
   lb_list_started = False
   lb_refresh()
   return weechat.WEECHAT_RC_OK
 
-
 def keyEvent (data, buffer, args):
   global lb_options
-
   lb_options[args]()
   
 def lb_input_cb(data, buffer, input_data):
   global lb_options, lb_curline
-  
   lb_options[input_data]()
   return weechat.WEECHAT_RC_OK
 
 def lb_refresh():
   global lb_channels, lb_buffer
   weechat.buffer_clear(lb_buffer)
-  
+
   y = 0
   for list_data in lb_channels:
     lb_refresh_line(y)
@@ -231,14 +225,12 @@ def lb_refresh():
 
 def lb_refresh_line(y):
   global lb_buffer, lb_curline, lb_channels
-  
   if y >= 0 and y < len(lb_channels):
     formatted_line = lb_line_format(lb_channels[y], y == lb_curline)
     weechat.prnt_y(lb_buffer, y, formatted_line)
 
 def lb_refresh_curline():
   global lb_curline
-  
   lb_refresh_line(lb_curline-1)
   lb_refresh_line(lb_curline)
   lb_refresh_line(lb_curline+1)
@@ -256,7 +248,6 @@ def lb_line_format(list_data,curr=False):
 
 def lb_line_up():
   global lb_curline
-  
   if lb_curline <= 0:
     return
   lb_curline -= 1
@@ -266,7 +257,6 @@ def lb_line_up():
 
 def lb_line_down():
   global lb_curline, lb_channels
-  
   if lb_curline+1 >= len(lb_channels):
     return
   lb_curline += 1
@@ -276,7 +266,6 @@ def lb_line_down():
 
 def lb_line_run():
   global lb_channels, lb_curline, lb_network
-
   buff = weechat.info_get("irc_buffer", lb_network)
   channel = lb_channels[lb_curline]['channel']
   command = "/join %s" % channel
@@ -288,7 +277,6 @@ def lb_line_select():
 
 def lb_scroll_top():
   global lb_curline
-
   old_y = lb_curline
   lb_curline = 0
   lb_refresh_curline()  
@@ -298,7 +286,6 @@ def lb_scroll_top():
 
 def lb_scroll_bottom():
   global lb_curline, lb_channels
-
   old_y = lb_curline
   lb_curline = len(lb_channels)-1
   lb_refresh_curline()
@@ -308,7 +295,6 @@ def lb_scroll_bottom():
 
 def lb_check_outside_window():
   global lb_buffer, lb_curline
-
   if (lb_buffer):
     infolist = weechat.infolist_get("window", "", "current")
     if (weechat.infolist_next(infolist)):
@@ -326,7 +312,7 @@ def lb_sort_next():
     new_index = lb_sort_options.index(lb_current_sort) + 1
   else:
     new_index = 0
-  
+
   if len(lb_sort_options) <= new_index:
     new_index = 0
 
@@ -345,7 +331,6 @@ def lb_sort_previous():
 
   lb_current_sort = lb_sort_options[new_index]
   lb_sort()
-    
 
 def lb_sort(sort_key=None):
   global lb_channels, lb_current_sort, lb_sort_inverted
@@ -358,18 +343,17 @@ def lb_sort(sort_key=None):
   if lb_sort_inverted:
     lb_channels.reverse()
   lb_refresh()
-  
+
 def lb_sort_invert():
   global lb_current_sort, lb_sort_inverted
   if lb_current_sort:
     lb_sort_inverted = not lb_sort_inverted
     lb_sort()
-
   
 def lb_close_cb(*kwargs):
   """ A callback for buffer closing. """
   global lb_buffer
-  
+
   lb_buffer = None
   return weechat.WEECHAT_RC_OK
 
@@ -394,19 +378,12 @@ def lb_command_main(data, buffer, args):
 if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, "lb_close_cb", ""):
-    #        # Set default settings
-    #        for option, default_value in lb_settings.iteritems():
-    #            if not weechat.config_is_set_plugin(option):
-    #                weechat.config_set_plugin(option, default_value)
-
     lb_buffer = weechat.buffer_search("python", "listbuffer")
-
     lb_create_buffer()
 
     weechat.hook_signal("*,irc_in_321", "lb_list_start", "")
     weechat.hook_signal("*,irc_in_322", "lb_list_chan", "")
     weechat.hook_signal("*,irc_in_323", "lb_list_end", "")
-    
     weechat.hook_command(SCRIPT_COMMAND, 
                           "List Buffer",
                           "", "", "", 
