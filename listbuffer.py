@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ListBuffer, version 0.6 for WeeChat version 0.3
+# ListBuffer, version 0.7 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/listbuffer
 #
 #   Show /list results in a common buffer and interact with them.
@@ -44,6 +44,11 @@
 # * version 0.6: Stop shoving that buffer in my face!
 #     * The listbuffer should no longer pop up by itself when you load the script.
 #       It should only pop up now when you actually do a /list query.
+#
+# * version 0.7: .. but please pop it up in my current window when I ask for it
+#     * Added setting plugins.var.python.listbuffer.autofocus
+#       This will autofocus the listbuffer in the current window if another window isn't
+#       already showing it, and of course only when the user issues /list
 #
 ## Acknowledgements:
 # * Dmitry "troydm" Geurkov, for providing the inverse-sorting patch to the project.
@@ -103,7 +108,7 @@
 #
 SCRIPT_NAME    = "listbuffer"
 SCRIPT_AUTHOR  = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION = "0.6"
+SCRIPT_VERSION = "0.7"
 SCRIPT_LICENSE = "MIT"
 SCRIPT_DESC    = "A common buffer for /list output."
 SCRIPT_COMMAND = "listbuffer"
@@ -118,6 +123,9 @@ except ImportError:
 
 import re
 
+lb_settings = (
+  ("autofocus", "on", "Focus the listbuffer in the current window if it isn't already displayed by a window."),
+)
 lb_buffer = None
 lb_channels = []
 lb_network = None
@@ -139,7 +147,6 @@ def lb_create_buffer():
   global lb_buffer, lb_curline
 
   if not lb_buffer:
-    # Sets notify to 0 as this buffer does not need to be in hotlist.
     lb_buffer = weechat.buffer_new("listbuffer", "lb_input_cb", \
                 "", "lb_close_cb", "")
     weechat.buffer_set(lb_buffer, "title", lb_line_format({
@@ -149,6 +156,7 @@ def lb_create_buffer():
       'topic': 'Topic',
       'nomodes': None,
     }))
+    # Sets notify to 0 as this buffer does not need to be in hotlist.
     weechat.buffer_set(lb_buffer, "notify", "0")
     weechat.buffer_set(lb_buffer, "nicklist", "0")
     weechat.buffer_set(lb_buffer, "type", "free")
@@ -163,7 +171,10 @@ def lb_create_buffer():
     weechat.buffer_set(lb_buffer, "key_bind_meta-<", "/listbuffer **sort_previous")
     weechat.buffer_set(lb_buffer, "key_bind_meta-/", "/listbuffer **sort_invert")
     lb_curline = 0
-    
+  if weechat.config_get_plugin("autofocus") == "on":
+    if not weechat.window_search_with_buffer(lb_buffer):
+      weechat.command("", "/buffer " + weechat.buffer_get_string(lb_buffer,"name"))
+
 def lb_list_start(data, signal, message):
   lb_initialise_list
   
@@ -381,9 +392,20 @@ def lb_command_main(data, buffer, args):
     keyEvent(data, buffer, args[2:])
   return weechat.WEECHAT_RC_OK
 
+def lb_set_default_settings():
+  global lb_settings
+  # Set default settings
+  for option, default_value, description in lb_settings:
+     if not weechat.config_is_set_plugin(option):
+         weechat.config_set_plugin(option, default_value)
+         version = weechat.info_get("version_number", "") or 0
+         if int(version) >= 0x00030500:
+             weechat.config_set_desc_plugin(option, description)
+
 if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, "lb_close_cb", ""):
+    lb_set_default_settings()
     lb_buffer = weechat.buffer_search("python", "listbuffer")
 
     weechat.hook_signal("*,irc_in_321", "lb_list_start", "")
