@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ListBuffer, version 0.5 for WeeChat version 0.3
+# ListBuffer, version 0.6 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/listbuffer
 #
 #   Show /list results in a common buffer and interact with them.
@@ -39,6 +39,12 @@
 #     * Added inverted sorting support provided by Dmitry "troydm" Geurkov
 #       Use meta-/ to switch between inverted and regular sorting.
 #
+### 2012-02-10: FiXato:
+#
+# * version 0.6: Stop shoving that buffer in my face!
+#     * The listbuffer should no longer pop up by itself when you load the script.
+#       It should only pop up now when you actually do a /list query.
+#
 ## Acknowledgements:
 # * Dmitry "troydm" Geurkov, for providing the inverse-sorting patch to the project.
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass IRC client WeeChat
@@ -72,7 +78,7 @@
 #   - Sort by integer for user count
 #   - Add optional command redirection.
 #
-## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
+## Copyright (c) 2011,2012 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
 #   http://google.com/profiles/FiXato
 #
@@ -97,7 +103,7 @@
 #
 SCRIPT_NAME    = "listbuffer"
 SCRIPT_AUTHOR  = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION = "0.5"
+SCRIPT_VERSION = "0.6"
 SCRIPT_LICENSE = "MIT"
 SCRIPT_DESC    = "A common buffer for /list output."
 SCRIPT_COMMAND = "listbuffer"
@@ -379,7 +385,6 @@ if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, "lb_close_cb", ""):
     lb_buffer = weechat.buffer_search("python", "listbuffer")
-    lb_create_buffer()
 
     weechat.hook_signal("*,irc_in_321", "lb_list_start", "")
     weechat.hook_signal("*,irc_in_322", "lb_list_chan", "")
