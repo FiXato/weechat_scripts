@@ -136,7 +136,7 @@ def remove_from_nick_colours(colour):
     weechat.prnt(weechat.current_buffer(),'%sThe colour \"%s\" is not present in weechat.color.chat_nick_colors' % (weechat.prefix("error"), colour))
     return
   colours.remove(colour)
-  wc_nick_colours = ', '.join(colours)
+  wc_nick_colours = ','.join(colours)
   weechat.config_option_set(wc_nick_colours_pointer(),wc_nick_colours,1)
   load_buffer_items()
 
@@ -146,7 +146,7 @@ def add_to_nick_colours(colour):
     weechat.prnt(weechat.current_buffer(),'%sThe colour \"%s\" is already present in weechat.color.chat_nick_colors' % (weechat.prefix("error"), colour))
     return
   colours.append(colour)
-  wc_nick_colours = ', '.join(colours)
+  wc_nick_colours = ','.join(colours)
   weechat.config_option_set(wc_nick_colours_pointer(),wc_nick_colours,1)
   load_buffer_items()
 
