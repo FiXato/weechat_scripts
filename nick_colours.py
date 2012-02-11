@@ -11,7 +11,9 @@
 ### 2012-02-10: FiXato:
 # 
 # * version 0.1: initial release.
-#     * 
+#     * It lists all currently assigned weechat.color.chat_nick_colors
+#     * You can browse through the nick colours list and remove items
+#     * You can get a list of all 256 colours and add colours from it
 #
 ## Acknowledgements:
 # * Sébastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -20,7 +22,8 @@
 #    inspired me to work on this script.
 #
 ## TODO: 
-#   - Show all currently used nick colours in a custom buffer.
+#   - Fix a bug with buffer scrolling to the top after adding a colour
+#   - Fix a bug with current line not being marked when removing the last colour
 #
 ## Copyright (c) 2011 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
@@ -69,10 +72,18 @@ config_settings = (
 script_buff = None
 buff_items = []
 curline = 0
+buffer_screen = "list"
 
 def buffer_items():
   global buff_items
   return buff_items
+
+def buffer_action():
+  global buffer_screen
+  if buffer_screen == "weechat_colours":
+    return "add"
+  else:
+    return "remove"
 
 def script_buffer():
   global script_buff
@@ -85,7 +96,6 @@ def create_script_buffer():
   if not script_buffer():
     script_buff = weechat.buffer_new(SCRIPT_BUFFERNAME, "buffer_input_cb", \
                 "", "buffer_close_cb", "")
-    weechat.buffer_set(script_buffer(), "title", "Colours used for nicks")
     # Sets notify to 0 as this buffer does not need to be in hotlist.
     weechat.buffer_set(script_buffer(), "notify", "0")
     weechat.buffer_set(script_buffer(), "nicklist", "0")
@@ -97,16 +107,60 @@ def create_script_buffer():
     weechat.buffer_set(script_buffer(), "key_bind_meta2-4~", "/%s **scroll_bottom" % SCRIPT_COMMAND)
     weechat.buffer_set(script_buffer(), "key_bind_meta-ctrl-J", "/%s **enter" % SCRIPT_COMMAND)
     weechat.buffer_set(script_buffer(), "key_bind_meta-ctrl-M", "/%s **enter" % SCRIPT_COMMAND)
+    weechat.buffer_set(script_buffer(), "key_bind_meta--", "/%s **remove" % SCRIPT_COMMAND)
+    weechat.buffer_set(script_buffer(), "key_bind_meta-+", "/%s **add" % SCRIPT_COMMAND)
+    weechat.buffer_set(script_buffer(), "key_bind_-", "/%s **list" % SCRIPT_COMMAND)
+    weechat.buffer_set(script_buffer(), "key_bind_+", "/%s **colours" % SCRIPT_COMMAND)
     curline = 0
   if weechat.config_get_plugin("autofocus") == "on":
     if not weechat.window_search_with_buffer(script_buffer()):
       weechat.command("", "/buffer " + weechat.buffer_get_string(script_buffer(),"name"))
 
-def script_initialise_list():
-  global buff_items
-  nick_colours = weechat.config_string(weechat.config_get('weechat.color.chat_nick_colors'))
-  buff_items = [x.strip() for x in nick_colours.split(',')]
-  return
+def enter_buffer_screen(screen):
+  global buffer_screen, curline
+  buffer_screen = screen
+  load_buffer_items()
+  curline = 0
+  buffer_refresh()
+
+def wc_nick_colours_pointer():
+  return weechat.config_get('weechat.color.chat_nick_colors')
+
+def nick_colours():
+  weechat_nick_colours = weechat.config_string(wc_nick_colours_pointer())
+  return [x.strip() for x in weechat_nick_colours.split(',')]
+
+def remove_from_nick_colours(colour):
+  colours = nick_colours()
+  if not colour in colours:
+    weechat.prnt(weechat.current_buffer(),'%sThe colour \"%s\" is not present in weechat.color.chat_nick_colors' % (weechat.prefix("error"), colour))
+    return
+  colours.remove(colour)
+  wc_nick_colours = ', '.join(colours)
+  weechat.config_option_set(wc_nick_colours_pointer(),wc_nick_colours,1)
+  load_buffer_items()
+
+def add_to_nick_colours(colour):
+  colours = nick_colours()
+  if colour in colours:
+    weechat.prnt(weechat.current_buffer(),'%sThe colour \"%s\" is already present in weechat.color.chat_nick_colors' % (weechat.prefix("error"), colour))
+    return
+  colours.append(colour)
+  wc_nick_colours = ', '.join(colours)
+  weechat.config_option_set(wc_nick_colours_pointer(),wc_nick_colours,1)
+  load_buffer_items()
+
+def load_buffer_items():
+  global buff_items, buffer_screen
+  if buffer_screen == 'weechat_colours':
+    buff_items = ["%s" % i for i in range(256) if "%s" % i not in nick_colours()]
+    weechat.buffer_set(script_buffer(), "title", "Terminal Colours. Press - to view the WeeChat Nick Colours screen; alt-plus (+) to add selected nick colour; alt-enter to insert context-specific command.")
+  else: #list
+    weechat.buffer_set(script_buffer(), "title", "Nicks Colours. Press + to view the add colour screen; alt-hypen (-) to remove selected nick colour; alt-enter to insert context-specific command.")
+    buff_items = nick_colours()
+  if not script_buffer():
+    return
+  buffer_refresh()
 
 def keyEvent (data, buffer, args):
   global buffer_options
@@ -118,8 +172,12 @@ def buffer_input_cb(data, buffer, input_data):
   return weechat.WEECHAT_RC_OK
 
 def buffer_refresh():
+  global curline
+  if not script_buffer():
+    return
   weechat.buffer_clear(script_buffer())
 
+  # FIXME: Make sure buffer gets redrawn at the same position as last time
   y = 0
   for list_data in buffer_items():
     buffer_refresh_line(y)
@@ -143,7 +201,9 @@ def buffer_line_format(buffer_item,curr=False):
   str = ""
   if (curr):
     str += weechat.color("white,darkgray")
-  str += "%s%s" % (weechat.color(buffer_item), buffer_item)
+  # TODO: Make the pangram random (http://en.wikipedia.org/wiki/List_of_pangrams)
+  pangram = "The five boxing wizards jump quickly."
+  str += "%s%s (%s)" % (weechat.color(buffer_item), pangram, buffer_item)
   return str
 
 def buffer_line_up():
@@ -168,7 +228,7 @@ def buffer_line_run():
   global curline
   selected_item = buffer_items()[curline]
 
-  command = ""
+  command = "/input insert /nick_colours %s %s" % (buffer_action(), selected_item)
   buffer = ""
   weechat.command(buffer, command)
   return
@@ -192,6 +252,24 @@ def buffer_scroll_bottom():
   buffer_refresh_curline()
   buffer_refresh_line(old_y)
   weechat.command(script_buffer(), "/window scroll_bottom")
+  return
+
+def buffer_switch_to_colours():
+  enter_buffer_screen('weechat_colours')
+
+def buffer_switch_to_list():
+  enter_buffer_screen('list')
+
+def buffer_remove_item():
+  global curline
+  selected_item = buffer_items()[curline]
+  remove_from_nick_colours(selected_item)
+  return
+
+def buffer_add_item():
+  global curline
+  selected_item = buffer_items()[curline]
+  add_to_nick_colours(selected_item)
   return
 
 def buffer_check_outside_window():
@@ -222,15 +300,33 @@ buffer_options = {
   'space'        : buffer_line_select,
   'scroll_top'   : buffer_scroll_top,
   'scroll_bottom': buffer_scroll_bottom,
+  'remove'       : buffer_remove_item,
+  'add'          : buffer_add_item,
+  'colours'      : buffer_switch_to_colours,
+  'list'         : buffer_switch_to_list,
 }
 
 def buffer_command_main(data, buffer, args):
-  if args[0:2] == "**":
-    keyEvent(data, buffer, args[2:])
-  elif args == "":
-    script_initialise_list()
+  if args == "":
+    action = ""
+  else:
+    params = args.split()
+    action = params.pop(0)
+    arg_string = ' '.join(params)
+  
+  if action[0:2] == "**":
+    keyEvent(data, buffer, action[2:])
+  elif action == "remove":
+    remove_from_nick_colours(arg_string)
+  elif action == "add":
+    add_to_nick_colours(arg_string)
+  elif action == "colours":
+    enter_buffer_screen('weechat_colours')
+  elif action == "list":
+    enter_buffer_screen('list')
+  else:
     create_script_buffer()
-    buffer_refresh()
+    enter_buffer_screen('list')
   return weechat.WEECHAT_RC_OK
 
 def set_default_settings():
