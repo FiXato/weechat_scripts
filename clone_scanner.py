@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 0.7 for WeeChat version 0.3
+# Clone Scanner, version 0.8 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -76,6 +76,11 @@
 #       This will autofocus the clone_scanner buffer in the current window if another window isn't
 #       already showing it, and of course only when the clone_scanner buffer is triggered
 #
+### 2012-02-10: FiXato:
+#
+# * version 0.8: .. and only when it is first created..
+#     * Prevents the buffer from being focused every time there is activity in it and not being shown in a window.
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
@@ -114,7 +119,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.7"
+SCRIPT_VERSION  = "0.8"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -256,9 +261,9 @@ def cs_get_buffer():
     weechat.buffer_set(cs_buffer, "title", "Clone Scanner")
     weechat.buffer_set(cs_buffer, "notify", "0")
     weechat.buffer_set(cs_buffer, "nicklist", "0")
-  if weechat.config_get_plugin("autofocus") == "on":
-    if not weechat.window_search_with_buffer(cs_buffer):
-      weechat.command("", "/buffer " + weechat.buffer_get_string(cs_buffer,"name"))
+    if weechat.config_get_plugin("autofocus") == "on":
+      if not weechat.window_search_with_buffer(cs_buffer):
+        weechat.command("", "/buffer " + weechat.buffer_get_string(cs_buffer,"name"))
 
   return cs_buffer
 
