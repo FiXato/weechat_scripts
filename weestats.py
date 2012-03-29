@@ -68,53 +68,62 @@ except ImportError:
   print "This script must be run under WeeChat."
   import_ok = False
 
+class infolist_reader:
+  def __init__(self, name):
+        # These values are created
+        # when the class is instantiated.
+        self.name = name
+  def __enter__(self):
+    self.infolist = w.infolist_get(self.name, "", "")
+    return self.infolist
+  def __exit__(self, type, value, traceback):
+    w.infolist_free(self.infolist)
+
 def close_cb(*kwargs):
   return w.WEECHAT_RC_OK
 
 def command_main(data, buffer, args):
-  infolist = w.infolist_get("buffer", "", "")
   buffer_groups = {}
   results = []
   buffer_count = 0
   merge_count = 0
   numbers = set()
-  while w.infolist_next(infolist):
-    bplugin = w.infolist_string(infolist, "plugin_name")
-    bname = w.infolist_string(infolist, "name")
-    bpointer = w.infolist_pointer(infolist, "pointer")
-    bnumber = w.infolist_integer(infolist, "number")
-    if not bnumber in numbers:
-      numbers.add(bnumber)
-    else:
-      merge_count += 1
-    btype = bplugin
-    if bplugin == 'irc':
-      if  'server.' in bname:
-        btype = '%s servers' % btype
-      elif '#' in bname:
-        btype = '%s channels' % btype
+
+  with infolist_reader("buffer") as infolist:
+    while w.infolist_next(infolist):
+      bplugin = w.infolist_string(infolist, "plugin_name")
+      bname = w.infolist_string(infolist, "name")
+      bpointer = w.infolist_pointer(infolist, "pointer")
+      bnumber = w.infolist_integer(infolist, "number")
+      if not bnumber in numbers:
+        numbers.add(bnumber)
       else:
-        btype = '%s queries' % btype
+        merge_count += 1
+      btype = bplugin
+      if bplugin == 'irc':
+        if  'server.' in bname:
+          btype = '%s servers' % btype
+        elif '#' in bname:
+          btype = '%s channels' % btype
+        else:
+          btype = '%s queries' % btype
       
     buffer_groups.setdefault(btype,[]).append({'name': bname, 'pointer': bpointer})
 
-  w.infolist_free(infolist)
-
-  infolist = w.infolist_get("window", "", "")
   windows_v = set()
   windows_h = set()
   windows = set()
-  while w.infolist_next(infolist):
-    window = w.infolist_pointer(infolist, "pointer")
-    window_w = w.infolist_integer(infolist, "width_pct")
-    window_h = w.infolist_integer(infolist, "height_pct")
-    windows.add(window)
-    if window_h == 100 and window_w != 100:
-      windows_v.add(window)
-    elif window_w == 100 and window_h != 100:
-      windows_h.add(window)
-    #else: #both 100%, thus no splits
-  w.infolist_free(infolist)
+  with infolist_reader("window") as infolist:
+    while w.infolist_next(infolist):
+      window = w.infolist_pointer(infolist, "pointer")
+      window_w = w.infolist_integer(infolist, "width_pct")
+      window_h = w.infolist_integer(infolist, "height_pct")
+      windows.add(window)
+      if window_h == 100 and window_w != 100:
+        windows_v.add(window)
+      elif window_w == 100 and window_h != 100:
+        windows_h.add(window)
+      #else: #both 100%, thus no splits
     
   window_count = len(windows)
 
