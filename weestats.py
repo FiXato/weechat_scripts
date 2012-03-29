@@ -17,6 +17,7 @@
 # * version 0.2: Getting the splits.
 #     * Displays the how many vertical and horizontal windows.
 #       (not quite sure if my approximation is correct though..)
+#     * Fixed possible memleak (forgot to free an infolist)
 #
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
@@ -113,6 +114,7 @@ def command_main(data, buffer, args):
     elif window_w == 100 and window_h != 100:
       windows_h.add(window)
     #else: #both 100%, thus no splits
+  w.infolist_free(infolist)
     
   window_count = len(windows)
 
