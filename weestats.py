@@ -119,11 +119,9 @@ if __name__ == "__main__" and import_ok:
 
     w.hook_command(SCRIPT_COMMAND, 
                           SCRIPT_DESC,
-                          "[arguments description]",
-                          "Command description: \n"
-                          "With multiple lines.\n",
+                          "",
+                          "Inserts useless statistics about your open windows and buffers into your input line.\n",
 
-                          " || completion"
-                          " || more-completion",
+                          "",
 
                           "command_main", "")
