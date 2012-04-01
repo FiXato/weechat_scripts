@@ -304,11 +304,8 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
     if hostname_to_match and hostname_to_match.lower() != hostname:
       continue
 
-    if hostname not in matches:
-      matches[hostname] = []
-
     nick = weechat.infolist_string(infolist, "name")
-    matches[hostname].append({
+    matches.setdefault(hostname,[]).append({
       'nick': nick,
       'mask': "%s!%s" % (
         format_from_config(nick, "colors.mask.nick"), 
