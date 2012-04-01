@@ -215,6 +215,11 @@ def on_join_scan_cb(data, signal, signal_data):
   join_match_data = re.match(':[^!]+!([^@]+@(\S+)) JOIN :?(#\S+)', signal_data)
   parsed_ident_host = join_match_data.group(1)
   parsed_host = join_match_data.group(2).lower()
+  if weechat.config_get_plugin("compare_idents") == "on":
+    key = parsed_ident_host
+  else:
+    key = parsed_host
+
   chan_name = join_match_data.group(3)
   network_chan_name = "%s.%s" % (network, chan_name)
   chan_buffer = weechat.info_get("irc_buffer", "%s,%s" % (network, chan_name))
@@ -234,11 +239,11 @@ def on_join_scan_cb(data, signal, signal_data):
     message = format_from_config(message, "colors.join_messages.message")
     weechat.prnt(cs_get_buffer(), message)
 
-  clones = get_clones_for_buffer("%s,%s" % (network, chan_name), parsed_host)
+  clones = get_clones_for_buffer("%s,%s" % (network, chan_name), key)
   if clones:
     key = get_validated_key_from_config("clone_onjoin_alert_key")
 
-    filtered_clones = filter(lambda clone: clone['nick'] != joined_nick, clones[parsed_host])
+    filtered_clones = filter(lambda clone: clone['nick'] != joined_nick, clones[key])
     match_strings = map(lambda m: format_from_config(m[key], "colors.onjoin_alert.matches"), filtered_clones)
 
     join_string = format_from_config(' and ',"colors.onjoin_alert.message")
