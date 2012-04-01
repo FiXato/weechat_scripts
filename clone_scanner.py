@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 0.8 for WeeChat version 0.3
+# Clone Scanner, version 0.9 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -81,11 +81,19 @@
 # * version 0.8: .. and only when it is first created..
 #     * Prevents the buffer from being focused every time there is activity in it and not being shown in a window.
 #
+### 2012-04-01: FiXato:
+#
+# * version 0.9: Hurrah for bouncers...
+#     * Added the option plugins.var.python.clone_scanner.compare_idents
+#       Set it to 'on' if you don't want people with different idents to be marked as clones.
+#       Useful on channels with bouncers.
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
 # * ArZa, whose kickban.pl script helped me get started with using the
 #   infolist results. 
+# * LayBot, for requesting the ident comparison
 #
 ## TODO: 
 #   - Add option to enable/disable public clone reporting aka msg channels
@@ -119,7 +127,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "0.8"
+SCRIPT_VERSION  = "0.9"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -137,6 +145,7 @@ import re
 cs_buffer = None
 cs_settings = (
   ("autofocus",                           "on", "Focus the clone_scanner buffer in the current window if it isn't already displayed by a window."),
+  ("compare_idents",                      "off", "Match against ident@host.name instead of just the hostname. Useful if you don't want different people from bouncers marked as clones"),
   ("display_join_messages",               "off", "Display all joins in the clone_scanner buffer"),
   ("display_onjoin_alert_clone_buffer",   "on", "Display an on-join clone alert in the clone_scanner buffer"),
   ("display_onjoin_alert_target_buffer",  "on", "Display an on-join clone alert in the buffer where the clone was detected"),
@@ -300,17 +309,23 @@ def get_clones_for_buffer(infolist_buffer_name, hostname_to_match=None):
       continue
 
     hostname = host_matchdata.group(2).lower()
+    ident = host_matchdata.group(1).lower()
 
     if hostname_to_match and hostname_to_match.lower() != hostname:
       continue
 
     nick = weechat.infolist_string(infolist, "name")
-    matches.setdefault(hostname,[]).append({
+    if weechat.config_get_plugin("compare_idents") == "on":
+      key = ident_hostname.lower()
+    else:
+      key = hostname
+
+    matches.setdefault(key,[]).append({
       'nick': nick,
       'mask': "%s!%s" % (
         format_from_config(nick, "colors.mask.nick"), 
         format_from_config(ident_hostname, "colors.mask.identhost")),
-      'ident': host_matchdata.group(1),
+      'ident': ident,
       'ident_hostname': ident_hostname,
       'hostname': hostname,
     })
