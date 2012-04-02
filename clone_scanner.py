@@ -107,7 +107,6 @@
 #   - Add option to enable/disable scanning on certain channels/networks
 #   - Add cross-channel clone scan
 #   - Add cross-server clone scan
-#   - Make clone_scanner buffer optional
 #
 ## Copyright (c) 2011-2012 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
