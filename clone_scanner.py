@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 1.1 for WeeChat version 0.3
+# Clone Scanner, version 1.2 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -101,6 +101,9 @@
 #     * Continuing to fix the on-join scanner bugs introduced by the 0.9 release.
 #       The ident@host.name dict key wasn't being lowercased for comparison in the on-join scan.
 #
+# * version 1.2: So shameless!
+#     * Added shameless advertising for my script through /clone_scanner advertise
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
@@ -139,7 +142,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "1.1"
+SCRIPT_VERSION  = "1.2"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
@@ -395,6 +398,8 @@ def cs_command_main(data, buffer, args):
       report_clones(clones, '%s.%s' % (server_name, channel_name))
     if weechat.config_get_plugin("display_scan_report_current_buffer") == "on":
       report_clones(clones, '%s.%s' % (server_name, channel_name), weechat.current_buffer())
+  elif args[0:9] == 'advertise':
+    weechat.command("", "/input insert /me is using FiXato's CloneScanner v%s for WeeChat. Get the latest version from: https://github.com/FiXato/weechat_scripts/blob/master/clone_scanner.py" % SCRIPT_VERSION)
   return weechat.WEECHAT_RC_OK
 
 def cs_set_default_settings():
@@ -417,7 +422,7 @@ if __name__ == "__main__" and import_ok:
 
     weechat.hook_command(SCRIPT_COMMAND, 
                           SCRIPT_DESC,
-                          "[scan] [[plugin.][network.]channel] | [help]",
+                          "[scan] [[plugin.][network.]channel] | [advertise] | [help]",
                           "the target_buffer can be: \n"
                           "- left out, so the current channel buffer will be scanned.\n"
                           "- a plain channel name, such as #weechat, in which case it will prefixed with the current network name\n"
@@ -426,6 +431,7 @@ if __name__ == "__main__" and import_ok:
                           "See /set plugins.var.python.clone_scanner.* for all possible configuration options",
 
                           " || scan %(buffers_names)"
+                          " || advertise"
                           " || help",
 
                           "cs_command_main", "")
