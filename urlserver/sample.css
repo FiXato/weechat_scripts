@@ -1,0 +1,139 @@
+/* Reset all browser default CSS rules
+   http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+
+/* Some of UrlServer.py's default styles */
+.urls table { border-collapse: collapse }
+.urls table td,th { border: solid 1px #333; padding: 4px; }
+.obj { margin-top: 1em }
+.timestamp,.nick,.buffer { white-space: nowrap }
+
+/* Some default tag styling to make things look nicer */
+html {
+  color: #cfc;
+  background-color: #111;
+  font-family: 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+a {
+  font-weight : bold;
+  font-style : normal;
+  color : #00FF00;  
+  text-decoration: none;
+}
+
+a:visited  {
+  font-weight : bold;
+  font-style : normal;
+  color : #00FF00;  
+  text-decoration: none;
+}
+  
+a:active  {
+  font-weight : bold;
+  font-style : normal;
+  color : #00FF00;  
+  text-decoration: none;
+}
+
+a:hover  {
+  font-weight : bold;
+  font-style : normal;
+  color : #3399ff;  
+  text-decoration: none;
+}
+
+/* Left align table headers */
+th { text-align: left; }
+
+/*
+  What follows are a selection of possible class-specific styling
+  Feel free to disable or enable some of these by adding or removing these kinds of comment lines
+*/
+
+/* Hide the prefix, prefix_suffix and message parts of the message and only show its url: */
+/* Remove this comment to enable this rule
+  td.message .prefix, 
+  td.message .prefix_suffix,
+  td.message span.message { display: none;}
+*/ /* and don't forget to remove this closing line too ;-) */
+
+/* Hide the prefix and prefix_suffix parts of the message as the nick already has its own column: */
+/* Remove this comment to enable this rule
+  td.message .prefix, 
+  td.message .prefix_suffix { display: none;}
+*/
+
+/* Hide the Time column */
+/* Remove this comment to enable this rule
+.time_header, .timestamp { display: none; }
+*/
+
+/* Let's ditch the Nicks column */
+/* Remove this comment to enable this rule
+.nick_header, .nick { display: none; }
+*/
+
+/* Not interested in the Buffers column */
+/* Remove this comment to enable this rule
+.buffer_header, .buffer { display: none; }
+*/
+
+/* Format the prefix (making it italic and grey for instance) */
+td.message .prefix { font-style: italic; color: #bbb;}
+  
+/* Lower contrast on the non-url parts of the message, so the URL stands out more */
+td.message span { color: #999; }
+
+/* Make the URL stand out more */
+td.message .url { font-size: 1.2em; font-style: italic; }
+
+/* Don't allow the urls inside the messages to wrap */
+td.message .url { white-space: nowrap; }
