@@ -112,6 +112,7 @@ urlserver_settings_default = {
     'http_hostname'      : ('', 'force hostname/IP in bind of socket (empty value = auto-detect current hostname)'),
     'http_hostname_display': ('', 'display this hostname in shortened URLs'),
     'http_port'          : ('', 'force port for listening (empty value = find a random free port)'),
+    'http_port_display'  : ('', 'display this port in shortened URLs. Useful if you forward a different external port to the internal port'),
     'http_allowed_ips'   : ('', 'regex for IPs allowed to use server (example: "^(123.45.67.89|192.160.*)$")'),
     'http_auth'          : ('', 'login and password (format: "login:password") required to access to page with list of URLs'),
     'http_url_prefix'    : ('', 'prefix to add in URLs to prevent external people to scan your URLs (for example: prefix "xx" will give URL: http://host.com:1234/xx/8)'),
@@ -176,7 +177,9 @@ def urlserver_short_url(number):
 
     #If the built-in HTTP server isn't running (e.g. it's disabled 'cause we're using an external parser/server for instance), default to port from settings
     port = urlserver_settings['http_port']
-    if urlserver['socket']:
+    if len(urlserver_settings['http_port_display']) > 0:
+        port = urlserver_settings['http_port_display']
+    elif urlserver['socket']:
         port = urlserver['socket'].getsockname()[1]
     prefixed_port = ':%s' % port
     # Don't add :port if the port matches the default scheme
