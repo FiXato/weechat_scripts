@@ -43,6 +43,10 @@
 #
 # History:
 #
+# 2012-04-18, Filip H.F. "FiXato" Slagter <fixato+weechat+urlserver@gmail.com>:
+#     version 0.9: add options "http_autostart", "http_port_display"
+#                  "url_min_length" can now be set to -1 to auto-detect minimal url length
+#                  Also, if port is 80 now, :80 will no longer be added to the shortened url.
 # 2012-04-17, Filip H.F. "FiXato" Slagter <fixato+weechat+urlserver@gmail.com>:
 #     version 0.8: add more CSS support by adding options "http_fg_color", "http_css_url",
 #                  and "http_title", add descriptive classes to most html elements.
@@ -68,7 +72,7 @@
 
 SCRIPT_NAME    = 'urlserver'
 SCRIPT_AUTHOR  = 'Sebastien Helleu <flashcode@flashtux.org>'
-SCRIPT_VERSION = '0.8'
+SCRIPT_VERSION = '0.9'
 SCRIPT_LICENSE = 'GPL3'
 SCRIPT_DESC    = 'Shorten URLs with own HTTP server'
 
