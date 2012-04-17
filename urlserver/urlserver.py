@@ -69,7 +69,7 @@
 
 SCRIPT_NAME    = 'urlserver'
 SCRIPT_AUTHOR  = 'Sebastien Helleu <flashcode@flashtux.org>'
-SCRIPT_VERSION = '0.7'
+SCRIPT_VERSION = '0.8'
 SCRIPT_LICENSE = 'GPL3'
 SCRIPT_DESC    = 'Shorten URLs with own HTTP server'
 
