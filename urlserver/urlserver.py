@@ -123,6 +123,7 @@ urlserver_settings_default = {
     'http_embed_youtube_size': ('480*350', 'size for embedded youtube video, format is "xxx*yyy"'),
     'http_prefix_suffix' : (' ', 'suffix displayed between prefix and message in HTML page'),
     'http_title'         : ('WeeChat URLs', 'title of the HTML page'),
+    'server_scheme'      : ('', 'The server scheme to be used in URLs. For now only http is supported for the built-in server though. At the moment meant for external servers'),
     # message filter settings
     'msg_ignore_buffers' : ('core.weechat,python.grep', 'comma-separated list (without spaces) of buffers to ignore (full name like "irc.freenode.#weechat")'),
     'msg_ignore_tags'    : ('irc_quit,irc_part,notify_none', 'comma-separated list (without spaces) of tags (or beginning of tags) to ignore (for example, use "notify_none" to ignore self messages or "nick_weebot" to ignore messages from nick "weebot")'),
@@ -166,12 +167,28 @@ def base64_decode(s):
 def urlserver_short_url(number):
     """Return short URL with number."""
     global urlserver_settings
+
+    scheme = 'http'
+    if len(urlserver_settings['server_scheme']) > 0:
+        scheme = urlserver_settings['server_scheme']
+
+    hostname = urlserver_settings['http_hostname_display'] or urlserver_settings['http_hostname'] or socket.getfqdn()
+
+    #If the built-in HTTP server isn't running (e.g. it's disabled 'cause we're using an external parser/server for instance), default to port from settings
+    port = urlserver_settings['http_port']
+    if urlserver['socket']:
+        port = urlserver['socket'].getsockname()[1]
+    prefixed_port = ':%s' % port
+    # Don't add :port if the port matches the default scheme
+    if (scheme == 'http' and port == '80') or (scheme == 'https' and port == '443'):
+        prefixed_port = ''
+
     prefix = ''
     if urlserver_settings['http_url_prefix']:
         prefix = '%s/' % urlserver_settings['http_url_prefix']
-    return 'http://%s:%s/%s%s' % (urlserver_settings['http_hostname_display'] or urlserver_settings['http_hostname'] or socket.getfqdn(),
-                                  urlserver['socket'].getsockname()[1],
-                                  prefix, base62_encode(number))
+
+    url = '%s://%s%s/%s%s' % (scheme, hostname, prefixed_port, prefix, base62_encode(number))
+    return url
 
 def urlserver_server_reply(conn, code, extra_header, message, mimetype='text/html'):
     """Send a HTTP reply to client."""
