@@ -124,7 +124,6 @@ urlserver_settings_default = {
     'http_embed_youtube_size': ('480*350', 'size for embedded youtube video, format is "xxx*yyy"'),
     'http_prefix_suffix' : (' ', 'suffix displayed between prefix and message in HTML page'),
     'http_title'         : ('WeeChat URLs', 'title of the HTML page'),
-    'server_scheme'      : ('', 'The server scheme to be used in URLs. For now only http is supported for the built-in server though. At the moment meant for external servers'),
     # message filter settings
     'msg_ignore_buffers' : ('core.weechat,python.grep', 'comma-separated list (without spaces) of buffers to ignore (full name like "irc.freenode.#weechat")'),
     'msg_ignore_tags'    : ('irc_quit,irc_part,notify_none', 'comma-separated list (without spaces) of tags (or beginning of tags) to ignore (for example, use "notify_none" to ignore self messages or "nick_weebot" to ignore messages from nick "weebot")'),
@@ -169,29 +168,25 @@ def urlserver_short_url(number):
     """Return short URL with number."""
     global urlserver_settings
 
-    scheme = 'http'
-    if len(urlserver_settings['server_scheme']) > 0:
-        scheme = urlserver_settings['server_scheme']
-
     hostname = urlserver_settings['http_hostname_display'] or urlserver_settings['http_hostname'] or socket.getfqdn()
 
-    #If the built-in HTTP server isn't running (e.g. it's disabled 'cause we're using an external parser/server for instance), default to port from settings
+    #If the built-in HTTP server isn't running, default to port from settings
     port = urlserver_settings['http_port']
     if len(urlserver_settings['http_port_display']) > 0:
         port = urlserver_settings['http_port_display']
     elif urlserver['socket']:
         port = urlserver['socket'].getsockname()[1]
+
+    # Don't add :port if the port matches the default port for the http protocol, port 80
     prefixed_port = ':%s' % port
-    # Don't add :port if the port matches the default scheme
-    if (scheme == 'http' and port == '80') or (scheme == 'https' and port == '443'):
+    if prefixed_port == ':80':
         prefixed_port = ''
 
     prefix = ''
     if urlserver_settings['http_url_prefix']:
         prefix = '%s/' % urlserver_settings['http_url_prefix']
 
-    url = '%s://%s%s/%s%s' % (scheme, hostname, prefixed_port, prefix, base62_encode(number))
-    return url
+    return 'http://%s%s/%s%s' % (hostname, prefixed_port, prefix, base62_encode(number))
 
 def urlserver_server_reply(conn, code, extra_header, message, mimetype='text/html'):
     """Send a HTTP reply to client."""
@@ -679,12 +674,10 @@ if __name__ == '__main__' and import_ok:
                              '  - If you do not like the default HTML formatting, you can override the CSS:\n'
                              '      /set plugins.var.python.urlserver.http_css_url "http://example.com/sample.css"\n'
                              '      See https://raw.github.com/FiXato/weechat_scripts/master/urlserver/sample.css\n'
-                             '  - Don\'t like the built-in HTTP server? Disable it and use your own parser/server:\n'
+                             '  - Don\'t like the built-in HTTP server to start automatically? Disable it:\n'
                              '      /set plugins.var.python.urlserver.http_autostart "off"\n'
-                             '  - Does your external server support HTTPS? Enable these options:\n'
-                             '      /set plugins.var.python.urlserver.http_port_display "443"\n'
-                             '      /set plugins.var.python.urlserver.server_scheme "https"\n'
-                             '  Note that with your own server you will have to parse and serve the urls file yourself.'
+                             '  - Have external port 80 forwarded to your internal server port? Remove :port with:\n'
+                             '      /set plugins.var.python.urlserver.http_port_display "80"\n'
                              '\n'
                              'Tip: use URL without key at the end to display list of all URLs in your browser.',
                              'start|restart|stop|status|clear', 'urlserver_cmd_cb', '')
