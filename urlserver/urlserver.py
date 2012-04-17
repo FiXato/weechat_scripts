@@ -44,9 +44,8 @@
 # History:
 #
 # 2012-04-17, Filip H.F. "FiXato" Slagter <fixato+weechat+urlserver@gmail.com>:
-#     version 0.8: Added more CSS support by adding options "http_fg_color", "http_css_url",
-#                  "http_default_css" and "http_title", and adding descriptive classes
-#                  to most html elements.
+#     version 0.8: add more CSS support by adding options "http_fg_color", "http_css_url",
+#                  and "http_title", add descriptive classes to most html elements.
 #                  See https://raw.github.com/FiXato/weechat_scripts/master/urlserver/sample.css
 #                  for a sample css file that can be used for http_css_url
 # 2012-04-11, Sebastien Helleu <flashcode@flashtux.org>:
@@ -117,13 +116,12 @@ urlserver_settings_default = {
     'http_url_prefix'    : ('', 'prefix to add in URLs to prevent external people to scan your URLs (for example: prefix "xx" will give URL: http://host.com:1234/xx/8)'),
     'http_bg_color'      : ('#f4f4f4', 'background color for HTML page'),
     'http_fg_color'      : ('#000', 'foreground color for HTML page'),
-    'http_default_css'   : ('on', 'add the default Cascading Style Sheet style definition. Disable this if you prefer to just use your own external css file'),
-    'http_css_url'       : ('', 'URL of external Cascading Style Sheet to add. BE CAREFUL: the HTTP referer will be set to site hosting css file!'),
+    'http_css_url'       : ('', 'URL of external Cascading Style Sheet to add (BE CAREFUL: the HTTP referer will be sent to site hosting CSS file!) (empty value = use default embedded CSS)'),
     'http_embed_image'   : ('off', 'embed images in HTML page (BE CAREFUL: the HTTP referer will be sent to site hosting image!)'),
     'http_embed_youtube' : ('off', 'embed youtube videos in HTML page (BE CAREFUL: the HTTP referer will be sent to youtube!)'),
     'http_embed_youtube_size': ('480*350', 'size for embedded youtube video, format is "xxx*yyy"'),
     'http_prefix_suffix' : (' ', 'suffix displayed between prefix and message in HTML page'),
-    'http_title' : ('WeeChat URLs', 'title of the HTML page'),
+    'http_title'         : ('WeeChat URLs', 'title of the HTML page'),
     # message filter settings
     'msg_ignore_buffers' : ('core.weechat,python.grep', 'comma-separated list (without spaces) of buffers to ignore (full name like "irc.freenode.#weechat")'),
     'msg_ignore_tags'    : ('irc_quit,irc_part,notify_none', 'comma-separated list (without spaces) of tags (or beginning of tags) to ignore (for example, use "notify_none" to ignore self messages or "nick_weebot" to ignore messages from nick "weebot")'),
@@ -267,7 +265,9 @@ def urlserver_server_reply_list(conn, sort='-time'):
         content += '<td class="timestamp">%s</td><td class="nick">%s</td><td class="buffer">%s</td><td class="message">' % (item[0], item[1], item[2])
         content += '%s%s</td></tr>\n' % (message, obj)
     content += '</table>'
-    if urlserver_settings['http_default_css'] == 'on':
+    if len(urlserver_settings['http_css_url']) > 0:
+        css = '<link rel="stylesheet" type="text/css" href="%s" />' % urlserver_settings['http_css_url']
+    else:
         css = '<style type="text/css" media="screen">' \
             '<!--\n' \
             '  html { font-family: Verdana, Arial, Helvetica; font-size: 12px; background: %s; color: %s }\n' \
@@ -278,10 +278,6 @@ def urlserver_server_reply_list(conn, sort='-time'):
             '  .obj { margin-top: 1em }\n' \
             '-->' \
             '</style>\n' % (urlserver_settings['http_bg_color'], urlserver_settings['http_fg_color'])
-    else:
-        css = ''
-    if len(urlserver_settings['http_css_url']) > 0:
-        css += '<link rel="stylesheet" type="text/css" href="%s" />' % urlserver_settings['http_css_url']
 
     html = '<html>\n' \
         '<head>\n' \
