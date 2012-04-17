@@ -54,7 +54,7 @@ table {
 .obj { margin-top: 1em }
 .timestamp,.nick,.buffer { white-space: nowrap }
 
-/* Some default tag styling to make things look nicer */
+/* Some default tag styling by FiXato to make things look nicer */
 html {
   color: #cfc;
   background-color: #111;
@@ -94,8 +94,9 @@ a:hover  {
 th { text-align: left; }
 
 /*
-  What follows are a selection of possible class-specific styling
+  What follows are a selection of possible class-specific styling ideas by FiXato
   Feel free to disable or enable some of these by adding or removing these kinds of comment lines
+  They are mostly just to give an idea of what is possible.
 */
 
 /* Hide the prefix, prefix_suffix and message parts of the message and only show its url: */
