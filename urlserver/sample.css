@@ -76,6 +76,13 @@ a:visited  {
   text-decoration: none;
 }
   
+a:hover  {
+  font-weight : bold;
+  font-style : normal;
+  color : #3399ff;  
+  text-decoration: none;
+}
+
 a:active  {
   font-weight : bold;
   font-style : normal;
@@ -83,12 +90,6 @@ a:active  {
   text-decoration: none;
 }
 
-a:hover  {
-  font-weight : bold;
-  font-style : normal;
-  color : #3399ff;  
-  text-decoration: none;
-}
 
 /* Left align table headers */
 th { text-align: left; }
