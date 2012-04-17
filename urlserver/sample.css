@@ -62,34 +62,33 @@ html {
   font-size: 12px;
 }
 
+/* All links */
 a {
   font-weight : bold;
   font-style : normal;
-  color : #00FF00;  
+  color : #00FF00;
   text-decoration: none;
 }
 
+/* Unvisited links */
+a:link {
+  color: #00FF00;
+}
+
+/* Visited links */
 a:visited  {
-  font-weight : bold;
-  font-style : normal;
-  color : #00FF00;  
-  text-decoration: none;
+  color: #00DD00;
 }
-  
+
+/* How to style them when you hover over them */
 a:hover  {
-  font-weight : bold;
-  font-style : normal;
-  color : #3399ff;  
-  text-decoration: none;
+  color: #3399ff;
 }
 
+/* Active/Selected Links */
 a:active  {
-  font-weight : bold;
-  font-style : normal;
-  color : #00FF00;  
-  text-decoration: none;
+  color: #FF7700;
 }
-
 
 /* Left align table headers */
 th { text-align: left; }
