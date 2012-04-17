@@ -145,3 +145,14 @@ td.message .url { white-space: nowrap; }
 } 
 
 
+/* Display the actual shorten url before the displayed urls */
+/* Remove this comment to enable this rule
+.url[href]:before { content: attr(href) " ("; }
+.url[href]:after { content: ")"; }
+*/
+
+/* Display the actual shorten url after the displayed urls */
+/* Remove this comment to enable this rule
+.url[href]:after { content: " (" attr(href) ")"; }
+*/
+
