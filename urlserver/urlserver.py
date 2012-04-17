@@ -675,7 +675,17 @@ if __name__ == '__main__' and import_ok:
                              '      /set plugins.var.python.urlserver.http_hostname "111.22.33.44"\n'
                              '  - it is strongly recommended to restrict IPs allowed and/or use auth, for example:\n'
                              '      /set plugins.var.python.urlserver.http_allowed_ips "^(123.45.67.89|192.160.*)$"\n'
-                             '      /set plugins.var.python.urlserver.http_auth "user:password"\n\n'
+                             '      /set plugins.var.python.urlserver.http_auth "user:password"\n'
+                             '  - If you do not like the default HTML formatting, you can override the CSS:\n'
+                             '      /set plugins.var.python.urlserver.http_css_url "http://example.com/sample.css"\n'
+                             '      See https://raw.github.com/FiXato/weechat_scripts/master/urlserver/sample.css\n'
+                             '  - Don\'t like the built-in HTTP server? Disable it and use your own parser/server:\n'
+                             '      /set plugins.var.python.urlserver.http_autostart "off"\n'
+                             '  - Does your external server support HTTPS? Enable these options:\n'
+                             '      /set plugins.var.python.urlserver.http_port_display "443"\n'
+                             '      /set plugins.var.python.urlserver.server_scheme "https"\n'
+                             '  Note that with your own server you will have to parse and serve the urls file yourself.'
+                             '\n'
                              'Tip: use URL without key at the end to display list of all URLs in your browser.',
                              'start|restart|stop|status|clear', 'urlserver_cmd_cb', '')
 
