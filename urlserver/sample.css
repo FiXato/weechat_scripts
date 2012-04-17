@@ -140,7 +140,7 @@ td.message .url { font-size: 1.2em; font-style: italic; }
 td.message .url { white-space: nowrap; }
 
 /* Place a Checkmark before visited urls (though this might not work due to http://dbaron.org/mozilla/visited-privacy) */
-a:visited:before {
+.url:visited:before {
    content:  "\2713 ";
 } 
 
