@@ -108,6 +108,7 @@ urlserver = {
 # script options
 urlserver_settings_default = {
     # HTTP server settings
+    'http_autostart'     : ('on', 'start the built-in HTTP server automatically)'),
     'http_hostname'      : ('', 'force hostname/IP in bind of socket (empty value = auto-detect current hostname)'),
     'http_hostname_display': ('', 'display this hostname in shortened URLs'),
     'http_port'          : ('', 'force port for listening (empty value = find a random free port)'),
@@ -131,7 +132,7 @@ urlserver_settings_default = {
     # display settings
     'color'              : ('darkgray', 'color for urls displayed'),
     'display_urls'       : ('on', 'display URLs below messages'),
-    'url_min_length'     : ('0', 'minimum length for an URL to be shortened (0 = shorten all URLs)'),
+    'url_min_length'     : ('0', 'minimum length for an URL to be shortened (0 = shorten all URLs, -1 = detect length based on shorten URL)'),
     'urls_amount'        : ('100', 'number of URLs to keep in memory (and in file when script is not loaded)'),
     'buffer_short_name'  : ('off', 'use buffer short name on dedicated buffer'),
     'debug'              : ('off', 'print some debug messages'),
@@ -538,6 +539,9 @@ def urlserver_print_cb(data, buffer, time, tags, displayed, highlight, prefix, m
     min_length = 0
     try:
         min_length = int(urlserver_settings['url_min_length'])
+        # Detect the minimum length based on shorten url length
+        if min_length == -1:
+            min_length = len(urlserver_short_url(urlserver['number'])) + 1
     except:
         min_length = 0
 
@@ -581,7 +585,9 @@ def urlserver_config_cb(data, option, value):
             else:
                 urlserver_settings[name] = value
                 if name in ('http_hostname', 'http_port'):
-                    urlserver_server_restart()
+                    # Don't restart if autostart is disabled and server isn't already running
+                    if urlserver_settings['http_autostart'] == 'on' or urlserver['socket']:
+                        urlserver_server_restart()
     return weechat.WEECHAT_RC_OK
 
 def urlserver_filename():
@@ -653,8 +659,9 @@ if __name__ == '__main__' and import_ok:
                              'Tip: use URL without key at the end to display list of all URLs in your browser.',
                              'start|restart|stop|status|clear', 'urlserver_cmd_cb', '')
 
-        # start mini HTTP server
-        urlserver_server_start()
+        if urlserver_settings['http_autostart'] == 'on':
+            # start mini HTTP server
+            urlserver_server_start()
 
         # load urls from file
         urlserver_read_urls()
