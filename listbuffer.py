@@ -126,6 +126,7 @@ lb_settings = (
   ("autofocus", "on", "Focus the listbuffer in the current window if it isn't already displayed by a window."),
 )
 lb_buffer = None
+lb_curline = 0
 lb_channels = []
 lb_network = None
 lb_list_started = False
