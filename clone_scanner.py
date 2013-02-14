@@ -227,7 +227,7 @@ def format_from_config(msg, config_option):
 def on_join_scan_cb(data, signal, signal_data):
   network = signal.split(',')[0]
   joined_nick = weechat.info_get("irc_nick_from_host", signal_data)
-  join_match_data = re.match(':[^!]+!([^@]+@(\S+)) JOIN :?(#\S+)', signal_data)
+  join_match_data = re.match(':[^!]+!([^@]+@(\S+)) JOIN :?([#&]\S+)', signal_data)
   parsed_ident_host = join_match_data.group(1).lower()
   parsed_host = join_match_data.group(2).lower()
   if weechat.config_get_plugin("compare_idents") == "on":
@@ -312,7 +312,7 @@ def get_channel_from_buffer_args(buffer, args):
   if not channel_name:
     channel_name = weechat.buffer_get_string(buffer, "localvar_channel")
 
-  match_data = re.match('\A(irc.)?([^.]+)\.(#\S+)\Z', channel_name)
+  match_data = re.match('\A(irc.)?([^.]+)\.([#&]\S+)\Z', channel_name)
   if match_data:
     channel_name = match_data.group(3)
     server_name = match_data.group(2)
