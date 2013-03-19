@@ -129,6 +129,8 @@ import re
 
 lb_settings = (
   ("autofocus", "on", "Focus the listbuffer in the current window if it isn't already displayed by a window."),
+  ("sort_order", "users", "Last used sort order for the channel list."),
+  ("sort_inverted", "on", "Invert the sort order for the channel list."),
 )
 lb_buffer = None
 lb_curline = 0
@@ -138,10 +140,10 @@ lb_list_started = False
 lb_current_sort = None
 lb_sort_inverted = False
 lb_sort_options = (
-  'users',
   'channel',
-  'topic',
+  'users',
   'modes',
+  'topic',
 )
 
 #                              server numeric Nick Chan  Users     Modes    Topic
@@ -154,13 +156,7 @@ def lb_create_buffer():
   if not lb_buffer:
     lb_buffer = weechat.buffer_new("listbuffer", "lb_input_cb", \
                 "", "lb_close_cb", "")
-    weechat.buffer_set(lb_buffer, "title", lb_line_format({
-      'channel': 'Channel name', 
-      'users': 'Users',
-      'modes': 'Modes',
-      'topic': 'Topic',
-      'nomodes': None,
-    }))
+    lb_set_buffer_title()
     # Sets notify to 0 as this buffer does not need to be in hotlist.
     weechat.buffer_set(lb_buffer, "notify", "0")
     weechat.buffer_set(lb_buffer, "nicklist", "0")
@@ -179,6 +175,17 @@ def lb_create_buffer():
   if weechat.config_get_plugin("autofocus") == "on":
     if not weechat.window_search_with_buffer(lb_buffer):
       weechat.command("", "/buffer " + weechat.buffer_get_string(lb_buffer,"name"))
+
+def lb_set_buffer_title():
+  global lb_buffer, lb_current_sort
+  ascdesc = '(v)' if lb_sort_inverted else '(^)'
+  weechat.buffer_set(lb_buffer, "title", lb_line_format({
+    'channel': 'Channel name%s' % (ascdesc if lb_current_sort == 'channel' else ''), 
+    'users': 'Users%s' % (ascdesc if lb_current_sort == 'users' else ''), 
+    'modes': 'Modes%s' % (ascdesc if lb_current_sort == 'modes' else ''), 
+    'topic': 'Topic%s' % (ascdesc if lb_current_sort == 'topic' else ''), 
+    'nomodes': None,
+  }))
 
 def lb_list_start(data, signal, message):
   lb_initialise_list
@@ -223,6 +230,8 @@ def lb_list_end(data, signal, message):
     lb_initialise_list(signal)
 
   lb_list_started = False
+  if lb_current_sort:
+    lb_sort()
   lb_refresh()
   return weechat.WEECHAT_RC_OK
 
@@ -338,8 +347,18 @@ def lb_sort_next():
   if len(lb_sort_options) <= new_index:
     new_index = 0
 
-  lb_current_sort = lb_sort_options[new_index]
+  lb_set_current_sort_order(lb_sort_options[new_index])
   lb_sort()
+
+def lb_set_current_sort_order(value):
+  global lb_current_sort
+  lb_current_sort = value
+  weechat.config_set_plugin('sort_order', lb_current_sort)
+
+def lb_set_invert_sort_order(value):
+  global lb_sort_inverted
+  lb_sort_inverted = value
+  weechat.config_set_plugin('sort_inverted', ('on' if lb_sort_inverted else 'off'))
 
 def lb_sort_previous():
   global lb_current_sort, lb_sort_options
@@ -351,25 +370,26 @@ def lb_sort_previous():
   if new_index < 0:
     new_index = len(lb_sort_options) - 1
 
-  lb_current_sort = lb_sort_options[new_index]
+  lb_set_current_sort_order(lb_sort_options[new_index])
   lb_sort()
 
 def lb_sort(sort_key=None):
   global lb_channels, lb_current_sort, lb_sort_inverted
   if sort_key:
-    lb_current_sort = sort_key
+    lb_set_current_sort_order(sort_key)
   if lb_current_sort == 'users':
     lb_channels = sorted(lb_channels, key=lambda chan_data: int(chan_data[lb_current_sort]))
   else:
     lb_channels = sorted(lb_channels, key=lambda chan_data: chan_data[lb_current_sort])
   if lb_sort_inverted:
     lb_channels.reverse()
+  lb_set_buffer_title()
   lb_refresh()
 
 def lb_sort_invert():
   global lb_current_sort, lb_sort_inverted
   if lb_current_sort:
-    lb_sort_inverted = not lb_sort_inverted
+    lb_set_invert_sort_order(not lb_sort_inverted)
     lb_sort()
   
 def lb_close_cb(*kwargs):
@@ -407,10 +427,16 @@ def lb_set_default_settings():
          if int(version) >= 0x00030500:
              weechat.config_set_desc_plugin(option, description)
 
+def lb_reset_stored_sort_order():
+  global lb_current_sort, lb_sort_inverted
+  lb_current_sort = weechat.config_get_plugin('sort_order')
+  lb_sort_inverted = (True if weechat.config_get_plugin('sort_inverted') == 'on' else False)
+
 if __name__ == "__main__" and import_ok:
   if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                       SCRIPT_LICENSE, SCRIPT_DESC, "lb_close_cb", ""):
     lb_set_default_settings()
+    lb_reset_stored_sort_order()
     lb_buffer = weechat.buffer_search("python", "listbuffer")
 
     weechat.hook_signal("*,irc_in_321", "lb_list_start", "")
