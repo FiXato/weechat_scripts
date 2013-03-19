@@ -280,7 +280,10 @@ def lb_line_format(list_data,curr=False):
     str += weechat.color("yellow,red")
   str += "%s%25s %7s " % (weechat.color("bold"), list_data['channel'], "(%s)" % list_data['users'])
   if not list_data['nomodes']:
-    str += "%10s: " % ("[%s]" % list_data['modes'])
+    modes = "[%s]" % list_data['modes']
+  else:
+    modes = "[]"
+  str += "%10s: " % modes
   str += "%s" % list_data['topic']
   return str
 
