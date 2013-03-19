@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ListBuffer, version 0.7.1 for WeeChat version 0.3
+# ListBuffer, version 0.8 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/listbuffer
 #
 #   Show /list results in a common buffer and interact with them.
@@ -55,6 +55,13 @@
 # * version 0.7.1: Forgetful bugfix
 #     * Made sure lb_curline global variable is defined
 #
+### 2013-03-19: FiXato:
+#
+# * version 0.8: Sorted out the sorting
+#     * Added automatically updating options for sorting: 
+#       * plugins.var.python.listbuffer.sort_inverted
+#       * plugins.var.python.listbuffer.sort_order 
+#
 ## Acknowledgements:
 # * Dmitry "troydm" Geurkov, for providing the inverse-sorting patch to the project.
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass IRC client WeeChat
@@ -68,12 +75,12 @@
 #    copied and ported to Python.
 # * Khaled Mardam-Bey, for making me yearn for similar /list support in 
 #    WeeChat as mIRC already offered. :P
+# * mave_, for pointing out that sort orders weren't remembered.
 #
 ## TODO: 
 #   - Auto-scroll selected line upon window scroll.
 #   - Add option to hide already joined channels.
 #   - Improve sorting methods
-#   - Add default sorting option
 #   - Add channel padding length option
 #   - Add usercount padding length option
 #   - Add modes padding length option
@@ -87,9 +94,9 @@
 #   - Allow selecting multiple channels
 #   - Add optional command redirection.
 #
-## Copyright (c) 2011,2012 Filip H.F. "FiXato" Slagter,
+## Copyright (c) 2011,2012,2013 Filip H.F. "FiXato" Slagter,
 #   <FiXato [at] Gmail [dot] com>
-#   http://google.com/profiles/FiXato
+#   http://profile.fixato.org
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -112,7 +119,7 @@
 #
 SCRIPT_NAME    = "listbuffer"
 SCRIPT_AUTHOR  = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION = "0.7.1"
+SCRIPT_VERSION = "0.8"
 SCRIPT_LICENSE = "MIT"
 SCRIPT_DESC    = "A common buffer for /list output."
 SCRIPT_COMMAND = "listbuffer"
