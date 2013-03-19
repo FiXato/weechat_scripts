@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ListBuffer, version 0.8 for WeeChat version 0.3
+# ListBuffer, version 0.8.1 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/listbuffer
 #
 #   Show /list results in a common buffer and interact with them.
@@ -61,6 +61,12 @@
 #     * Added automatically updating options for sorting: 
 #       * plugins.var.python.listbuffer.sort_inverted
 #       * plugins.var.python.listbuffer.sort_order 
+# * version 0.8.1: Pad it baby!
+#     * Channel modes are equally padded even when there are no channel modes.
+#     * Added padding options: 
+#       * plugins.var.python.listbuffer.modes_min_width
+#       * plugins.var.python.listbuffer.channel_min_width
+#       * plugins.var.python.listbuffer.users_min_width
 #
 ## Acknowledgements:
 # * Dmitry "troydm" Geurkov, for providing the inverse-sorting patch to the project.
@@ -81,9 +87,6 @@
 #   - Auto-scroll selected line upon window scroll.
 #   - Add option to hide already joined channels.
 #   - Improve sorting methods
-#   - Add channel padding length option
-#   - Add usercount padding length option
-#   - Add modes padding length option
 #   - Add auto-join support
 #   - Detect if channel is already in auto-join
 #   - Allow automatically switching to the listbuffer
@@ -119,7 +122,7 @@
 #
 SCRIPT_NAME    = "listbuffer"
 SCRIPT_AUTHOR  = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION = "0.8"
+SCRIPT_VERSION = "0.8.1"
 SCRIPT_LICENSE = "MIT"
 SCRIPT_DESC    = "A common buffer for /list output."
 SCRIPT_COMMAND = "listbuffer"
@@ -138,6 +141,9 @@ lb_settings = (
   ("autofocus", "on", "Focus the listbuffer in the current window if it isn't already displayed by a window."),
   ("sort_order", "users", "Last used sort order for the channel list."),
   ("sort_inverted", "on", "Invert the sort order for the channel list."),
+  ("modes_min_width", 8, "The minimum width used for modes in the channel list. If a channel has less modes than this amount, the column will be padded with spaces.")
+  ("channel_min_width", 25, "The minimum width used for the channel name in the channel list. If a channelname is shorter than this amount, the column will be padded with spaces.")
+  ("users_min_width", 5, "The minimum width used for the usercount in the channel list. If the usercount has less digits than this amount, the column will be padded with spaces.")
 )
 lb_buffer = None
 lb_curline = 0
@@ -278,12 +284,15 @@ def lb_line_format(list_data,curr=False):
   str = ""
   if (curr):
     str += weechat.color("yellow,red")
-  str += "%s%25s %7s " % (weechat.color("bold"), list_data['channel'], "(%s)" % list_data['users'])
+  channel_text = list_data['channel'].ljust(weechat.config_get_plugin('channel_min_width'))
+  users_text = "(%s)" % list_data['users']
+  padded_users_text = users_text.ljust(weechat.config_get_plugin('users_min_width') + 2)
+  str += "%s%s %s " % (weechat.color("bold"), channel_text, padded_users_text)
   if not list_data['nomodes']:
     modes = "[%s]" % list_data['modes']
   else:
     modes = "[]"
-  str += "%10s: " % modes
+  str += "%s: " % modes.ljust(weechat.config_get_plugin('modes_min_width') + 2)
   str += "%s" % list_data['topic']
   return str
 
