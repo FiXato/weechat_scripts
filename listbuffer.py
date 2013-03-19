@@ -141,9 +141,9 @@ lb_settings = (
   ("autofocus", "on", "Focus the listbuffer in the current window if it isn't already displayed by a window."),
   ("sort_order", "users", "Last used sort order for the channel list."),
   ("sort_inverted", "on", "Invert the sort order for the channel list."),
-  ("modes_min_width", 8, "The minimum width used for modes in the channel list. If a channel has less modes than this amount, the column will be padded with spaces.")
-  ("channel_min_width", 25, "The minimum width used for the channel name in the channel list. If a channelname is shorter than this amount, the column will be padded with spaces.")
-  ("users_min_width", 5, "The minimum width used for the usercount in the channel list. If the usercount has less digits than this amount, the column will be padded with spaces.")
+  ("modes_min_width", "8", "The minimum width used for modes in the channel list. If a channel has less modes than this amount, the column will be padded with spaces."),
+  ("channel_min_width", "25", "The minimum width used for the channel name in the channel list. If a channelname is shorter than this amount, the column will be padded with spaces."),
+  ("users_min_width", "8", "The minimum width used for the usercount in the channel list. If the usercount has less digits than this amount, the column will be padded with spaces."),
 )
 lb_buffer = None
 lb_curline = 0
@@ -284,15 +284,15 @@ def lb_line_format(list_data,curr=False):
   str = ""
   if (curr):
     str += weechat.color("yellow,red")
-  channel_text = list_data['channel'].ljust(weechat.config_get_plugin('channel_min_width'))
+  channel_text = list_data['channel'].ljust(int(weechat.config_get_plugin('channel_min_width')))
   users_text = "(%s)" % list_data['users']
-  padded_users_text = users_text.ljust(weechat.config_get_plugin('users_min_width') + 2)
+  padded_users_text = users_text.rjust(int(weechat.config_get_plugin('users_min_width')) + 2)
   str += "%s%s %s " % (weechat.color("bold"), channel_text, padded_users_text)
   if not list_data['nomodes']:
     modes = "[%s]" % list_data['modes']
   else:
     modes = "[]"
-  str += "%s: " % modes.ljust(weechat.config_get_plugin('modes_min_width') + 2)
+  str += "%s: " % modes.rjust(int(weechat.config_get_plugin('modes_min_width')) + 2)
   str += "%s" % list_data['topic']
   return str
 
