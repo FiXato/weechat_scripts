@@ -93,7 +93,10 @@ Thanks go out to:
     served as an example for handling infolists for clone_scanner.py.
 * Khaled Mardam-Bey, for making me yearn for similar /list support in 
     WeeChat as mIRC already offered. :P
-
+* LayBot, for requesting the ident comparison for clone_scanner.py
+* Curtis "killerrabbit" Sorensen, for sending in two pull-requests, 
+  adding support for local and nameless channels to clone_scanner.py
+* mave_, for pointing out that sort orders weren't remembered in listbuffer.py.
 
 ## Copyright
 ******************************************************************************
