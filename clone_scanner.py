@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Clone Scanner, version 1.2 for WeeChat version 0.3
+# Clone Scanner, version 1.3 for WeeChat version 0.3
 # Latest development version: https://github.com/FiXato/weechat_scripts
 #
 #   A Clone Scanner that can manually scan channels and 
@@ -104,12 +104,20 @@
 # * version 1.2: So shameless!
 #     * Added shameless advertising for my script through /clone_scanner advertise
 #
+### 2013-04-09: FiXato:
+# * version 1.3: Such a killer rabbit
+#     * Thanks to Curtis Sorensen aka killerrabbit clone_scanner.py now supports:
+#       * local channels (&-prefixed)
+#       * nameless channels (just # or &)
+#
 ## Acknowledgements:
 # * Sebastien "Flashcode" Helleu, for developing the kick-ass chat/IRC
 #    client WeeChat
 # * ArZa, whose kickban.pl script helped me get started with using the
 #   infolist results. 
 # * LayBot, for requesting the ident comparison
+# * Curtis "killerrabbit" Sorensen, for sending in two pull-requests, 
+#   adding support for local and nameless channels.
 #
 ## TODO: 
 #   - Add option to enable/disable public clone reporting aka msg channels
@@ -142,7 +150,7 @@
 #
 SCRIPT_NAME     = "clone_scanner"
 SCRIPT_AUTHOR   = "Filip H.F. 'FiXato' Slagter <fixato [at] gmail [dot] com>"
-SCRIPT_VERSION  = "1.2"
+SCRIPT_VERSION  = "1.3"
 SCRIPT_LICENSE  = "MIT"
 SCRIPT_DESC     = "A Clone Scanner that can manually scan channels and automatically scans joins for users on the channel with multiple nicknames from the same host."
 SCRIPT_COMMAND  = "clone_scanner"
