@@ -24,6 +24,16 @@ Scripts I've written to add features to WeeChat I felt were missing.
     Example: 
     `/swap #weechat #weechat-fr`
 
+* battlearena.py
+
+    Work in Progress script to make playing [Battle Arena](http://iyouboushi.com/forum/index.php?/topic/890-battle-arena-help-thread/) easier to play
+    `/battlearena use [tabcomplete techs] [tabcomplete enemies]`
+    `/battlearena stats buy [tabcomplete stats] 10`
+    `/battlearena +100str`
+    `/battlearena +10def`
+    `/battlearena styles [buy|list|change] [tabcomplete styles]`
+    `/battlearena report`
+
 ## Script ideas
 * Task https://savannah.nongnu.org/task/index.php?11351
     "Allow buffer names for irc.msgbuffer"
