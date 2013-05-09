@@ -34,6 +34,7 @@ DEFAULT_OPTIONS         = {
 
 try:
   import weechat, re
+  from random import choice
 except Exception:
   print("This script must be run under WeeChat. Get WeeChat now at: http://www.weechat.org/")
   quit()
@@ -49,6 +50,7 @@ dead_characters = {}
 npcs = {}
 players = {}
 unknown = {}
+current_weapon = None
 
 def arena_buffer():
   channel_name = OPTIONS['channel']
@@ -104,16 +106,17 @@ def is_voiced(nickname=None):
 
 
 def start_autobattle():
-  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook
+  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
   portal_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')
   attack_tech_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_out_of_tp_hook = weechat.hook_print(arena_buffer(), botnick_tag(), '%s does not have enough TP to perform this technique!' % current_nickname(), 1, 'cb_attack_out_of_tp_hook', '')
+  battle_has_ended_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'The Battle is Over!', 1, 'cb_battle_has_ended_hook', '')
   weechat.prnt("","AutoBattle started")
 
 def stop_autobattle():
-  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook
-  for hook in (portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook):
+  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
+  for hook in (portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook):
     weechat.unhook(hook)
   weechat.prnt("","AutoBattle stopped")
   return weechat.WEECHAT_RC_OK
@@ -359,6 +362,10 @@ def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, pre
   weechat.hook_timer(2 * 1000, 0, 1, "cb_attack", "")
   return weechat.WEECHAT_RC_OK
 
+def cb_battle_has_ended_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
+  global tp_delay
+  tp_delay = 0
+
 def select_enemy():
   global enemies
   if 'demon_portal' in enemies.keys():
@@ -366,38 +373,75 @@ def select_enemy():
   else:
     return enemies.values()[0]
 
-def select_tech(criteria=['weakest_level','best_level','current_weapon']):
-  global all_known_techs_by_weapon, current_weapon
-  if 'best level' in criteria and 'current_weapon' in criteria:
-    return max(all_known_techs_by_weapon[current_weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[current_weapon][key])))
-  elif 'weakest_level' in criteria and 'current_weapon' in criteria:
-    return min(all_known_techs_by_weapon[current_weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[current_weapon][key])))
+def debug_select_tech(criteria=[]):
+  global current_weapon
+  weapon, tech = select_tech(criteria)
+  if weapon != current_weapon:
+    weechat.prnt("", equip_weapon_cmd(weapon))
+    # weechat.command(arena_buffer(), equip_weapon_cmd(weapon))
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", tech_cmd(tech, 'SomeEnemy'))
   else:
-    return max(all_known_techs_by_weapon[current_weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[current_weapon][key])))
+    weechat.prnt("", tech_cmd(tech, 'SomeEnemy'))
+
+def select_tech(criteria=[]):
+  global all_known_techs_by_weapon, current_weapon
+  if 'current_weapon' in criteria:
+    weapon = current_weapon
+  else:
+    weapon = choice(all_known_techs_by_weapon.keys())
+
+  if 'max_level' in criteria:
+    tech = max(all_known_techs_by_weapon[weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[weapon][key])))
+  elif 'weakest_level' in criteria:
+    tech = min(all_known_techs_by_weapon[weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[weapon][key])))
+  else:
+    tech = choice(all_known_techs_by_weapon[weapon].keys())
+  
+  return weapon, tech
 
 def cb_use_tech(data, remaining_calls):
   use_tech()
   return weechat.WEECHAT_RC_OK
 
 def use_tech(tech=None, enemy=None):
+  global current_weapon
   if not enemy:
     enemy = select_enemy()
   if not tech:
     if enemy.lower() == 'evil_fixato':
-      tech = select_tech(['weakest_level', 'current_weapon'])
+      weapon, tech = select_tech(['weakest_level', 'current_weapon'])
     else:
-      tech = select_tech()
-  weechat.prnt("", "Will attack %s with tech %s" % (enemy, tech))
-  weechat.command(arena_buffer(), "/me uses his %s on %s" % (tech, enemy))
+      weapon, tech = select_tech()
+    
+  weechat.prnt("", "Will attack %s with tech %s using %s" % (enemy, tech, weapon))
+  if weapon != current_weapon:
+    weechat.command(arena_buffer(), equip_weapon_cmd(weapon))
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", tech_cmd(tech, enemy))
+  else:
+    weechat.command(arena_buffer(), tech_cmd(tech, enemy))
 
 def cb_attack(data, remaining_calls):
   attack()
   return weechat.WEECHAT_RC_OK
 
+def cb_battlecommand(data, remaining_calls):
+  weechat.prnt("", "Battle command! Remaining: %s" % remaining_calls)
+  weechat.command(arena_buffer(), data)
+  return weechat.WEECHAT_RC_OK
+
+def equip_weapon_cmd(weapon):
+  return "!equip %s" % weapon
+  
+def tech_cmd(tech, enemy):
+  return "/me uses his %s on %s" % (tech, enemy)
+  
+def attack_cmd(enemy):
+  return "/me attacks %s" % enemy
+
 def attack(enemy=None):
   if not enemy:
     enemy = select_enemy()
-  weechat.command(arena_buffer(), "/me attacks %s" % enemy)
+  weechat.command(arena_buffer(), attack_cmd(enemy))
 
 def format_dict(d):
   return ' | '.join(['%s: %s' % (k, v) for k, v in d.items()])
@@ -438,6 +482,15 @@ def cb_command(data, buffer, args):
         start_autobattle()
       elif args[1] == 'stop':
         stop_autobattle()
+
+    elif args[0] == 'debug':
+      if args[1] == 'techs':
+        weechat.prnt("", "Weakest current weapon:")
+        debug_select_tech(['weakest_level', 'current_weapon'])
+        weechat.prnt("", "Best current weapon:")
+        debug_select_tech(['max_level', 'current_weapon'])
+        weechat.prnt("", "Defaults:")
+        debug_select_tech()
 
     elif args[0] == 'use' and len(args) > 2:
       weechat.command(arena_buffer(),'/me uses his %s on %s' % (args[1], args[2]))
