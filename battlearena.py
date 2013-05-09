@@ -38,6 +38,7 @@ except Exception:
   print("This script must be run under WeeChat. Get WeeChat now at: http://www.weechat.org/")
   quit()
 
+tp_delay = 0
 available_techs = []
 known_techs = []
 all_known_techs_by_tech = {}
@@ -103,13 +104,17 @@ def is_voiced(nickname=None):
 
 
 def start_autobattle():
-  global portal_hook
+  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook
   portal_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')
+  attack_tech_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_attack_tech_hook', '')
+  attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_attack_tech_hook', '')
+  attack_out_of_tp_hook = weechat.hook_print(arena_buffer(), botnick_tag(), '%s does not have enough TP to perform this technique!' % current_nickname(), 1, 'cb_attack_out_of_tp_hook', '')
   weechat.prnt("","AutoBattle started")
 
 def stop_autobattle():
-  global portal_hook
-  weechat.unhook(portal_hook)
+  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook
+  for hook in (portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook):
+    weechat.unhook(hook)
   weechat.prnt("","AutoBattle stopped")
   return weechat.WEECHAT_RC_OK
 
@@ -187,6 +192,8 @@ def sanitise_battler_name(name):
     return 'goldmedusaheadclone'
   elif 'vampirecount' == alphanum_name:
     return 'count'
+  elif 'redorbfountain' == alphanum_name:
+    return 'orbfountain'
   elif 'vampirecountess' == alphanum_name:
     return 'countess'
   elif 'cloneof' in alphanum_name:
@@ -332,6 +339,65 @@ def cb_completion_available_techs(data, completion_item, buffer, completion):
 #==========================Other callbacks
 def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, message):
   weechat.command(buffer, "!enter")
+  return weechat.WEECHAT_RC_OK
+
+def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
+  global tp_delay
+  if tp_delay and tp_delay > 0:
+    tp_delay -= 1
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_attack", "")
+  else:
+    tp_delay = 0
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_use_tech", "")
+  return weechat.WEECHAT_RC_OK
+
+def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
+  global tp_delay
+  tp_delay = 5
+  weechat.command(buffer, "!tp")
+  weechat.command(buffer, "!bat info")
+  weechat.hook_timer(2 * 1000, 0, 1, "cb_attack", "")
+  return weechat.WEECHAT_RC_OK
+
+def select_enemy():
+  global enemies
+  if 'demon_portal' in enemies.keys():
+    return 'Demon_Portal'
+  else:
+    return enemies.values()[0]
+
+def select_tech(criteria=['weakest_level','best_level','current_weapon']):
+  global all_known_techs_by_weapon, current_weapon
+  if 'best level' in criteria and 'current_weapon' in criteria:
+    return max(all_known_techs_by_weapon[current_weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[current_weapon][key])))
+  elif 'weakest_level' in criteria and 'current_weapon' in criteria:
+    return min(all_known_techs_by_weapon[current_weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[current_weapon][key])))
+  else:
+    return max(all_known_techs_by_weapon[current_weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[current_weapon][key])))
+
+def cb_use_tech(data, remaining_calls):
+  use_tech()
+  return weechat.WEECHAT_RC_OK
+
+def use_tech(tech=None, enemy=None):
+  if not enemy:
+    enemy = select_enemy()
+  if not tech:
+    if enemy.lower() == 'evil_fixato':
+      tech = select_tech(['weakest_level', 'current_weapon'])
+    else:
+      tech = select_tech()
+  weechat.prnt("", "Will attack %s with tech %s" % (enemy, tech))
+  weechat.command(arena_buffer(), "/me uses his %s on %s" % (tech, enemy))
+
+def cb_attack(data, remaining_calls):
+  attack()
+  return weechat.WEECHAT_RC_OK
+
+def attack(enemy=None):
+  if not enemy:
+    enemy = select_enemy()
+  weechat.command(arena_buffer(), "/me attacks %s" % enemy)
 
 def format_dict(d):
   return ' | '.join(['%s: %s' % (k, v) for k, v in d.items()])
