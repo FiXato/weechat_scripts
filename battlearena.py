@@ -57,6 +57,7 @@ attack_tech_hook = None
 attack_tech_hook2 = None
 attack_out_of_tp_hook = None
 battle_has_ended_hook = None
+in_battle = False
 
 def arena_buffer():
   channel_name = OPTIONS['channel']
@@ -362,7 +363,10 @@ def cb_completion_available_techs(data, completion_item, buffer, completion):
 
 #==========================Other callbacks
 def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, message):
-  weechat.hook_timer((choice([2,3,4])) * 1000, 0, 1, "cb_battlecommand", "!enter")
+  global in_battle
+  if not in_battle:
+    in_battle = True
+    weechat.hook_timer((choice([2,3,4])) * 1000, 0, 1, "cb_battlecommand", "!enter")
   return weechat.WEECHAT_RC_OK
 
 def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
@@ -384,8 +388,9 @@ def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, pre
   return weechat.WEECHAT_RC_OK
 
 def cb_battle_has_ended_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay
+  global tp_delay, in_battle
   tp_delay = 0
+  in_battle = False
   return weechat.WEECHAT_RC_OK
 
 def select_enemy():
