@@ -122,7 +122,7 @@ def start_autobattle():
   global portal_hooks
   portal_hooks = [weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')]
   start_autobattle_hooks()
-  weechat.prnt("","AutoBattle started")
+  weechat.prnt(weechat.current_buffer(),"AutoBattle started")
 
 def start_autobattle_orbtrain():
   global portal_hooks
@@ -130,7 +130,7 @@ def start_autobattle_orbtrain():
   for nick in OPTIONS['orbtrain_drivers'].split():
     portal_hooks.append(weechat.hook_print(arena_buffer(), botnick_tag(), '%s has entered the battle!' % nick, 1, 'cb_enter_portal', ''))
   start_autobattle_hooks()
-  weechat.prnt("","AutoBattle started")
+  weechat.prnt(weechat.current_buffer(),"AutoBattle (OrbTrain style) started")
 
 def stop_autobattle():
   global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
@@ -139,7 +139,7 @@ def stop_autobattle():
   for hook in (attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook):
     if hook:
       weechat.unhook(hook)
-  weechat.prnt("","AutoBattle stopped")
+  weechat.prnt(weechat.current_buffer(),"AutoBattle stopped")
   return weechat.WEECHAT_RC_OK
 
 def buy_from_shop(shop_type, item, amount=1):
@@ -478,26 +478,26 @@ def cb_command(data, buffer, args):
   else:
     args = args.split()
     if args[0] == 'report':
-      weechat.prnt("", 'Current Battlers: ' + format_dict(battlers))
-      weechat.prnt("", 'Current Enemies: ' + format_dict(enemies))
-      weechat.prnt("", 'Current Dead Characters: ' + format_dict(dead_characters))
-      weechat.prnt("", 'Current Players: ' + format_dict(players))
-      weechat.prnt("", 'Current NPCs: ' + format_dict(npcs))
-      weechat.prnt("", 'Current Unknowns: ' + format_dict(unknown))
-      weechat.prnt("", 'Current Weapon: ' + current_weapon)
-      weechat.prnt("", 'Known Techs: ' + ', '.join(known_techs))
-      weechat.prnt("", 'Available Techs: ' + ', '.join(available_techs))
-      weechat.prnt("", 'All known Techs by Tech: ')
+      weechat.prnt(weechat.current_buffer(), 'Current Battlers: ' + format_dict(battlers))
+      weechat.prnt(weechat.current_buffer(), 'Current Enemies: ' + format_dict(enemies))
+      weechat.prnt(weechat.current_buffer(), 'Current Dead Characters: ' + format_dict(dead_characters))
+      weechat.prnt(weechat.current_buffer(), 'Current Players: ' + format_dict(players))
+      weechat.prnt(weechat.current_buffer(), 'Current NPCs: ' + format_dict(npcs))
+      weechat.prnt(weechat.current_buffer(), 'Current Unknowns: ' + format_dict(unknown))
+      weechat.prnt(weechat.current_buffer(), 'Current Weapon: ' + current_weapon)
+      weechat.prnt(weechat.current_buffer(), 'Known Techs: ' + ', '.join(known_techs))
+      weechat.prnt(weechat.current_buffer(), 'Available Techs: ' + ', '.join(available_techs))
+      weechat.prnt(weechat.current_buffer(), 'All known Techs by Tech: ')
       for tech, weapon_level in list(all_known_techs_by_tech.iteritems()):
-        weechat.prnt("", ' - %s:' % tech)
+        weechat.prnt(weechat.current_buffer(), ' - %s:' % tech)
         for weapon, level in list(weapon_level.iteritems()):
-          weechat.prnt("", '    - %s: %s' % (weapon, level))
+          weechat.prnt(weechat.current_buffer(), '    - %s: %s' % (weapon, level))
 
-      weechat.prnt("", 'All known Techs by Weapon: ')
+      weechat.prnt(weechat.current_buffer(), 'All known Techs by Weapon: ')
       for weapon, tech_level in list(all_known_techs_by_weapon.iteritems()):
-        weechat.prnt("", ' - %s:' % weapon)
+        weechat.prnt(weechat.current_buffer(), ' - %s:' % weapon)
         for tech, level in list(tech_level.iteritems()):
-          weechat.prnt("", '    - %s: %s' % (tech, level))
+          weechat.prnt(weechat.current_buffer(), '    - %s: %s' % (tech, level))
 
     if args[0] == 'autobattle':
       if args[1] == 'start':
