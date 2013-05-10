@@ -28,7 +28,8 @@ SCRIPT_DESC     = "BattleArena Autobattlers"
 DEFAULT_OPTIONS         = {
   'channel': ('EsperNET.#battlearena', 'The network.#channel where the Battle Arena is located.'),
   'botnick': ('BattleArena', 'The nickname of the Battle Arena bot that runs the game.'),
-  'password': ('Y0r p455w0rd', 'Your BattleArena password')
+  'password': ('Y0r p455w0rd', 'Your BattleArena password'),
+  'orbtrain_drivers': ('Raiden Tiranadel', 'High level players that you can hop on an orbtrain with.')
 }
 
 
@@ -51,6 +52,11 @@ npcs = {}
 players = {}
 unknown = {}
 current_weapon = None
+portal_hooks = []
+attack_tech_hook = None
+attack_tech_hook2 = None
+attack_out_of_tp_hook = None
+battle_has_ended_hook = None
 
 def arena_buffer():
   channel_name = OPTIONS['channel']
@@ -104,20 +110,35 @@ def is_voiced(nickname=None):
 
 
 
-
-def start_autobattle():
-  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
-  portal_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')
+def start_autobattle_hooks():
+  global attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
   attack_tech_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_out_of_tp_hook = weechat.hook_print(arena_buffer(), botnick_tag(), '%s does not have enough TP to perform this technique!' % current_nickname(), 1, 'cb_attack_out_of_tp_hook', '')
   battle_has_ended_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'The Battle is Over!', 1, 'cb_battle_has_ended_hook', '')
+
+def start_autobattle():
+  stop_autobattle()
+  global portal_hooks
+  portal_hooks = [weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')]
+  start_autobattle_hooks()
+  weechat.prnt("","AutoBattle started")
+
+def start_autobattle_orbtrain():
+  global portal_hooks
+  portal_hooks = []
+  for nick in OPTIONS['orbtrain_drivers'].split():
+    portal_hooks.append(weechat.hook_print(arena_buffer(), botnick_tag(), '%s has entered the battle!' % nick, 1, 'cb_enter_portal', ''))
+  start_autobattle_hooks()
   weechat.prnt("","AutoBattle started")
 
 def stop_autobattle():
-  global portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
-  for hook in (portal_hook, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook):
+  global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook
+  for hook in portal_hooks:
     weechat.unhook(hook)
+  for hook in (attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook):
+    if hook:
+      weechat.unhook(hook)
   weechat.prnt("","AutoBattle stopped")
   return weechat.WEECHAT_RC_OK
 
@@ -341,7 +362,7 @@ def cb_completion_available_techs(data, completion_item, buffer, completion):
 
 #==========================Other callbacks
 def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, message):
-  weechat.command(buffer, "!enter")
+  weechat.hook_timer((choice([2,3,4])) * 1000, 0, 1, "cb_battlecommand", "!enter")
   return weechat.WEECHAT_RC_OK
 
 def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
@@ -365,6 +386,7 @@ def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, pre
 def cb_battle_has_ended_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
   global tp_delay
   tp_delay = 0
+  return weechat.WEECHAT_RC_OK
 
 def select_enemy():
   global enemies
@@ -480,6 +502,8 @@ def cb_command(data, buffer, args):
     if args[0] == 'autobattle':
       if args[1] == 'start':
         start_autobattle()
+      if args[1] == 'orbtrain':
+        start_autobattle_orbtrain()
       elif args[1] == 'stop':
         stop_autobattle()
 
@@ -575,5 +599,5 @@ if __name__ == "__main__":
         " || techs list|buy %(plugin_available_techs)"
         " || use %(plugin_known_techs) %(plugin_enemies)|%(plugin_players)"
         " || setup bot "
-        " || autobattle start|end",
+        " || autobattle orbtrain|start|stop",
         "cb_command", "")
