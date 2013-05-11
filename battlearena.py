@@ -17,13 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# 2013-05-07: FiXato (freenode.#weechat)
+# 2013-05-07: FiXato (freenode.#weechat / espernet.#battlearena)
 #       0.1 : initial release
+# 2013-05-11: FiXato (freenode.#weechat / espernet.#battlearena)
+#       0.2 : Whole bunch of changes I still need to list here.
+#
 SCRIPT_NAME     = "battlearena"
 SCRIPT_AUTHOR   = "FiXato <FiXato+weechat@gmail.com>"
-SCRIPT_VERSION  = "0.1"
+SCRIPT_VERSION  = "0.2"
 SCRIPT_LICENSE  = "GPL"
-SCRIPT_DESC     = "BattleArena Autobattlers"
+SCRIPT_DESC     = "BattleArena autobattler and tabcompletion support."
 
 DEFAULT_OPTIONS         = {
   'channel': ('EsperNET.#battlearena', 'The network.#channel where the Battle Arena is located.'),
@@ -687,3 +690,30 @@ if __name__ == "__main__":
         " || setup bot "
         " || autobattle orbtrain|start|stop",
         "cb_command", "")
+
+## TODO LIST
+#
+# - Add bar items for:
+#   - Auto-battle status
+#   - Orbs
+#   - (Last reported) Level
+#   - Shop level
+#   - HP
+#   - TP
+#   - IG
+#   - Statuses
+#   - Skills
+#   - Weapon
+#   - Techs
+#   - Alive enemies
+#   - Players
+#   - Accessory
+#   - Keys
+#
+# - Skip techs when cursed
+# - Warn when you have a key for a chest on the battle arena.
+# - Keep track of received and used items
+# - Keep track of shop level and auto-use UltraDiscountCard when above 25 (Or above 26 if you have a VIP-Membercard)
+# - Update the command description and tab completion.
+# - Add support for skills
+# - Add support for styles
