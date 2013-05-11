@@ -60,8 +60,10 @@ attack_tech_hook = None
 attack_tech_hook2 = None
 attack_out_of_tp_hook = None
 battle_has_ended_hook = None
+battle_melee_only_hook = None
 battle_new_battler_has_entered_hook = None
 in_battle = False
+melee_only = False
 
 known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Latrilth", "Leaping_Lizzie", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "PoisonSlime", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Seiryu", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
@@ -120,12 +122,14 @@ def is_voiced(nickname=None):
 
 
 def start_autobattle_hooks():
-  global attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook
+  global attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
   attack_tech_hook  = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_out_of_tp_hook = weechat.hook_print(arena_buffer(), botnick_tag(), '%s does not have enough TP to perform this technique!' % current_nickname(), 1, 'cb_attack_out_of_tp_hook', '')
   battle_has_ended_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'The Battle is Over!', 1, 'cb_battle_has_ended_hook', '')
   battle_new_battler_has_entered_hook = weechat.hook_print(arena_buffer(), botnick_tag(), ' has entered the battle!', 1, 'cb_battle_new_battler_has_entered', '')
+  battle_melee_only_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'An ancient Melee-Only symbol glows on the ground of the battlefield.', 1, 'cb_battle_melee_only', '')
+  
 
 def start_autobattle():
   stop_autobattle()
@@ -143,10 +147,10 @@ def start_autobattle_orbtrain():
   weechat.prnt(weechat.current_buffer(),"AutoBattle (OrbTrain style) started")
 
 def stop_autobattle():
-  global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook
+  global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
   for hook in portal_hooks:
     weechat.unhook(hook)
-  for hook in (attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook):
+  for hook in (attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook):
     if hook:
       weechat.unhook(hook)
   weechat.prnt(weechat.current_buffer(),"AutoBattle stopped")
@@ -253,6 +257,9 @@ def get_battler_for_name(name):
       return battler
   return None
   
+def cb_battle_melee_only(data, buffer, date, tags, displayed, highlight, prefix, message):
+  global melee_only
+  melee_only = True
 
 def cb_battler_defeated_by(data, buffer, date, tags, displayed, highlight, prefix, message):
   global battlers, dead_characters, players, enemies, npcs, unknown
@@ -428,7 +435,10 @@ def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, mess
   return weechat.WEECHAT_RC_OK
 
 def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay
+  global tp_delay, melee_only
+  if melee_only:
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_attack", "")
+    return weechat.WEECHAT_RC_OK
   if tp_delay and tp_delay > 0:
     tp_delay -= 1
     weechat.prnt("", "Setting cb_attack timer")
@@ -448,9 +458,10 @@ def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, pre
   return weechat.WEECHAT_RC_OK
 
 def cb_battle_has_ended_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay, in_battle
+  global tp_delay, in_battle, melee_only
   tp_delay = 0
   in_battle = False
+  melee_only = False
   return weechat.WEECHAT_RC_OK
 
 def select_enemy():
