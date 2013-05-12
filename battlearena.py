@@ -21,10 +21,18 @@
 #       0.1 : initial release
 # 2013-05-11: FiXato (freenode.#weechat / espernet.#battlearena)
 #       0.2 : Whole bunch of changes I still need to list here.
+# 2013-05-12: FiXato (freenode.#weechat / espernet.#battlearena)
+#       0.3 : Added Taunting and stealing support amongst others:
+#             - Added support for 'gets another turn'.
+#             - Also fixed new battle enemy mapping.
+#             - Added 'steal_first' setting.
+#             - Added 'taunt_first' setting.
+#             - Removed cb_attack in favour of cb_battlecommand.
+#             - Added a couple more TODOs
 #
 SCRIPT_NAME     = "battlearena"
 SCRIPT_AUTHOR   = "FiXato <FiXato+weechat@gmail.com>"
-SCRIPT_VERSION  = "0.2"
+SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "BattleArena autobattler and tabcompletion support."
 
@@ -35,7 +43,9 @@ DEFAULT_OPTIONS         = {
   'orbtrain_drivers': ('Raiden Tiranadel', 'High level players that you can hop on an orbtrain with.'),
   'known_battlers_map_file': ('known_battlers_mapped.txt', 'Where the mapped battlers will be stored.'),
   'preferred_tech_criteria': ('max_level current_weapon', 'Space separated list of preferred tech criteria. Leave empty to use the default, which is random.'),
-  'override_tech': ('', 'Set this to a tech name if you want to override the tech that will be used during autobattle.')
+  'override_tech': ('', 'Set this to a tech name if you want to override the tech that will be used during autobattle.'),
+  'taunt_first': ('no', 'Set this to "yes" if you want to taunt an enemy first in the battle.  Use "random_once" if you want to leave it to choice once per battler, or "random_always" if you want it to always randomly try to taunt.'),
+  'steal_first': ('no', 'Set this to "yes" if you want to steal from an enemy first in the battle.')
 }
 
 
@@ -59,14 +69,9 @@ players = {}
 unknown = {}
 current_weapon = None
 portal_hooks = []
-attack_tech_hook = None
-attack_tech_hook2 = None
-attack_out_of_tp_hook = None
-battle_has_ended_hook = None
-battle_melee_only_hook = None
-battle_new_battler_has_entered_hook = None
-in_battle = False
-melee_only = False
+attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook = (None, None, None, None)
+battle_has_ended_hook, battle_melee_only_hook, battle_new_battler_has_entered_hook = (None, None, None)
+in_battle, melee_only, has_taunted, has_stolen = (False, False, False, False)
 
 known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Latrilth", "Leaping_Lizzie", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "PoisonSlime", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Seiryu", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
@@ -125,9 +130,10 @@ def is_voiced(nickname=None):
 
 
 def start_autobattle_hooks():
-  global attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
+  global attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
   attack_tech_hook  = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_attack_tech_hook', '')
+  attack_tech_hook3  = weechat.hook_print(arena_buffer(), botnick_tag(), '%s gets another turn.' % current_nickname(), 1, 'cb_attack_tech_hook', '')
   attack_out_of_tp_hook = weechat.hook_print(arena_buffer(), botnick_tag(), '%s does not have enough TP to perform this technique!' % current_nickname(), 1, 'cb_attack_out_of_tp_hook', '')
   battle_has_ended_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'The Battle is Over!', 1, 'cb_battle_has_ended_hook', '')
   battle_new_battler_has_entered_hook = weechat.hook_print(arena_buffer(), botnick_tag(), ' has entered the battle!', 1, 'cb_battle_new_battler_has_entered', '')
@@ -150,10 +156,10 @@ def start_autobattle_orbtrain():
   weechat.prnt(weechat.current_buffer(),"AutoBattle (OrbTrain style) started")
 
 def stop_autobattle():
-  global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
+  global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
   for hook in portal_hooks:
     weechat.unhook(hook)
-  for hook in (attack_tech_hook, attack_tech_hook2, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook):
+  for hook in (attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook):
     if hook:
       weechat.unhook(hook)
   weechat.prnt(weechat.current_buffer(),"AutoBattle stopped")
@@ -317,13 +323,13 @@ def cb_battle_new_battler_has_entered(data, buffer, date, tags, displayed, highl
   battler_name = m.groupdict()['battler']
   if battler_name in known_battlers_mapped:
     weechat.prnt("", "Already know %s as %s" % (battler_name, known_battlers_mapped[battler_name]))
-    enemies[battler_name.lower()] = known_battlers_mapped[battler_name]
+    enemies[known_battlers_mapped[battler_name].lower()] = known_battlers_mapped[battler_name]
     return weechat.WEECHAT_RC_OK
 
   plausible_battler_name = find_plausible_battler_for_name(battler_name)
   if plausible_battler_name:
     weechat.prnt("", "%s is probably %s" % (battler_name, plausible_battler_name))
-    enemies[battler_name.lower()] = plausible_battler_name
+    enemies[plausible_battler_name.lower()] = plausible_battler_name
     known_battlers_mapped[battler_name] = plausible_battler_name
     save_known_battlers()
   return weechat.WEECHAT_RC_OK
@@ -438,14 +444,26 @@ def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, mess
   return weechat.WEECHAT_RC_OK
 
 def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay, melee_only
+  global tp_delay, melee_only, has_stolen, has_taunted
   if melee_only:
-    weechat.hook_timer(3 * 1000, 0, 1, "cb_attack", "")
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
     return weechat.WEECHAT_RC_OK
+  if OPTIONS['steal_first'] == 'yes' and not has_stolen:
+    has_stolen = True
+    weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", steal_cmd(select_enemy()))
+    return weechat.WEECHAT_RC_OK
+  if OPTIONS['taunt_first'] in ('yes', 'random_once', 'random_always') and not has_taunted:
+    will_taunt = choice([True, False])
+    weechat.prnt("", "Will taunt: %s" % will_taunt)
+    if will_taunt and OPTIONS['taunt_first'] != 'random_always':
+      has_taunted = True
+    if will_taunt:
+      weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", taunt_cmd(select_enemy()))
+      return weechat.WEECHAT_RC_OK
   if tp_delay and tp_delay > 0:
     tp_delay -= 1
-    weechat.prnt("", "Setting cb_attack timer")
-    weechat.hook_timer(4 * 1000, 0, 1, "cb_attack", "")
+    weechat.prnt("", "Setting cb_battlecommand timer for attack_cmd")
+    weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
   else:
     tp_delay = 0
     weechat.prnt("", "Setting cb_use_tech timer")
@@ -457,14 +475,16 @@ def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, pre
   tp_delay = 5
   weechat.command(buffer, "!tp")
   weechat.command(buffer, "!bat info")
-  weechat.hook_timer(3 * 1000, 0, 1, "cb_attack", "")
+  weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
   return weechat.WEECHAT_RC_OK
 
 def cb_battle_has_ended_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay, in_battle, melee_only
+  global tp_delay, in_battle, melee_only, has_taunted, has_stolen
   tp_delay = 0
   in_battle = False
   melee_only = False
+  has_taunted = False
+  has_stolen = False
   return weechat.WEECHAT_RC_OK
 
 def select_enemy():
@@ -528,14 +548,16 @@ def use_tech(tech=None, enemy=None):
   else:
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", tech_cmd(tech, enemy))
 
-def cb_attack(data, remaining_calls):
-  attack()
-  return weechat.WEECHAT_RC_OK
-
 def cb_battlecommand(data, remaining_calls):
   weechat.prnt("", "Battle command! Remaining: %s" % remaining_calls)
   weechat.command(arena_buffer(), data)
   return weechat.WEECHAT_RC_OK
+
+def taunt_cmd(enemy):
+  return "!taunt %s" % enemy
+
+def steal_cmd(enemy):
+  return "!steal %s" % enemy
 
 def equip_weapon_cmd(weapon):
   return "!equip %s" % weapon
@@ -717,3 +739,6 @@ if __name__ == "__main__":
 # - Update the command description and tab completion.
 # - Add support for skills
 # - Add support for styles
+# - Make use of enemy info details such as:
+#   - "Water Elemental is a glowing orb of water magic. It seems resistant to melee."
+# - Capture the output of !shop list weapons and sort the weapons list by cost.
