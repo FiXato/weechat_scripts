@@ -78,6 +78,7 @@ attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook = 
 battle_has_ended_hook, battle_melee_only_hook, battle_new_battler_has_entered_hook = (None, None, None)
 in_battle, melee_only, has_taunted, has_stolen = (False, False, False, False)
 retry_counter = 0
+battle_mode = 'Normal'
 
 known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "BeeBear", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cave_Tiger", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Citadel_Bats", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Warrior", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dredd", "Dresden", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Healing_Slime", "Heraldic_Imp", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Large_Warmachine", "Latrilth", "Leaping_Lizzie", "Lenneth", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "Pallid_Percy", "PoisonSlime", "Poisonhand", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Sabertooth_Tiger", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Sea_Horror", "Seiryu", "Shanoa", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Lizard", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Volcano_Wasp", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zarklet", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
@@ -151,10 +152,11 @@ def start_autobattle_hooks():
   
 
 def start_autobattle():
+  global portal_hooks, battle_mode
   stop_autobattle()
-  global portal_hooks
   portal_hooks = [weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')]
   start_autobattle_hooks()
+  set_battle_mode('AutoBattle')
   weechat.prnt(weechat.current_buffer(),"AutoBattle started")
 
 def start_autobattle_orbtrain():
@@ -163,7 +165,26 @@ def start_autobattle_orbtrain():
   for nick in OPTIONS['orbtrain_drivers'].split():
     portal_hooks.append(weechat.hook_print(arena_buffer(), botnick_tag(), '%s has entered the battle!' % nick, 1, 'cb_enter_portal', ''))
   start_autobattle_hooks()
+  set_battle_mode('OrbTrain')
   weechat.prnt(weechat.current_buffer(),"AutoBattle (OrbTrain style) started")
+
+def set_battle_mode(mode):
+  global battle_mode
+  battle_mode = mode
+  weechat.bar_item_update("battlearena_battle_mode")
+  return battle_mode
+  
+def cb_battle_mode_item(data, item, window):
+  global battle_mode
+  if battle_mode == 'OrbTrain':
+    color = 'yellow'
+  elif battle_mode == 'Normal':
+    color = 'green'
+  elif battle_mode == 'AutoBattle':
+    color = 'lightred'
+  else:
+    color = '*default'
+  return '' + weechat.color(color) + battle_mode + weechat.color(COLORRESET) + ''
 
 def stop_autobattle():
   global portal_hooks, attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
@@ -173,6 +194,7 @@ def stop_autobattle():
     if hook:
       weechat.unhook(hook)
   weechat.prnt(weechat.current_buffer(),"AutoBattle stopped")
+  set_battle_mode('Normal')
   return weechat.WEECHAT_RC_OK
 
 def buy_from_shop(shop_type, item, amount=1):
@@ -806,6 +828,7 @@ if __name__ == "__main__":
       get_orbcount()
       orbs_bar_item = weechat.bar_item_new("battlearena_orbs", "cb_orbs_item", "")
       current_weapon_item = weechat.bar_item_new("battlearena_current_weapon", "cb_current_weapon_item", "")
+      battle_mode_item = weechat.bar_item_new("battlearena_battle_mode", "cb_battle_mode_item", "")
     weechat.hook_command("battlearena", "BattleArena client script with autobattle functions.",
         "[shop [list [items|techs|skills|stats|weapons|styles|orbs|ignitions|portal|misc|gems|alchemy]|buy [items|techs|skills|stats [hp|tp|ig|str|def|int|spd]|weapons|styles|orbs|ignitions|portal|misc|gems|alchemy]]] | autobattle [start|end]",
         "description of arguments...",
