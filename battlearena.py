@@ -152,18 +152,22 @@ def start_autobattle_hooks():
   
 
 def start_autobattle():
-  global portal_hooks, battle_mode
   stop_autobattle()
+
+  global portal_hooks, battle_mode
   portal_hooks = [weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')]
   start_autobattle_hooks()
   set_battle_mode('AutoBattle')
   weechat.prnt(weechat.current_buffer(),"AutoBattle started")
 
 def start_autobattle_orbtrain():
+  stop_autobattle()
+
   global portal_hooks
   portal_hooks = []
   for nick in OPTIONS['orbtrain_drivers'].split():
     portal_hooks.append(weechat.hook_print(arena_buffer(), botnick_tag(), '%s has entered the battle!' % nick, 1, 'cb_enter_portal', ''))
+
   start_autobattle_hooks()
   set_battle_mode('OrbTrain')
   weechat.prnt(weechat.current_buffer(),"AutoBattle (OrbTrain style) started")
@@ -213,6 +217,7 @@ def add_orbcount_hooks():
   orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'Black Orb(s) and has spent', 1, 'cb_orbcount', ''))
   orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'For their victory, these players have been rewarded with Red Orbs', 1, 'cb_orb_reward', ''))
   #TODO: FiXato unlocks the treasure chest and obtains 902 Red Orbs! The chest then disappears.
+  #TODO: The following players have absorbed a black orb from the boss: Tiranadel, FiXato
 
 def cb_orbcount(data, buffer, date, tags, displayed, highlight, prefix, message):
   weechat.prnt("", message)
@@ -844,8 +849,6 @@ if __name__ == "__main__":
 ## TODO LIST
 #
 # - Add bar items for:
-#   - Auto-battle status
-#   - Orbs
 #   - (Last reported) Level
 #   - Shop level
 #   - HP
@@ -853,7 +856,7 @@ if __name__ == "__main__":
 #   - IG
 #   - Statuses
 #   - Skills
-#   - Weapon
+#   - Owned Weapons
 #   - Techs
 #   - Alive enemies
 #   - Players
@@ -862,6 +865,7 @@ if __name__ == "__main__":
 #
 # - Skip techs when cursed
 # - Warn when you have a key for a chest on the battle arena.
+#   - FiXato has the following keys: BrownKey(2), RedKey(1), GreenKey(1), GoldKey(1), PurpleKey(2)
 # - Keep track of received and used items
 # - Keep track of shop level and auto-use UltraDiscountCard when above 25 (Or above 26 if you have a VIP-Membercard)
 # - Update the command description and tab completion.
