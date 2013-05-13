@@ -79,6 +79,10 @@ battle_has_ended_hook, battle_melee_only_hook, battle_new_battler_has_entered_ho
 in_battle, melee_only, has_taunted, has_stolen = (False, False, False, False)
 retry_counter = 0
 battle_mode = 'Normal'
+player_turn = None
+health_status = ''
+status_effects = []
+active_skills = []
 
 known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "BeeBear", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cave_Tiger", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Citadel_Bats", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Warrior", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dredd", "Dresden", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Healing_Slime", "Heraldic_Imp", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Large_Warmachine", "Latrilth", "Leaping_Lizzie", "Lenneth", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "Pallid_Percy", "PoisonSlime", "Poisonhand", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Sabertooth_Tiger", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Sea_Horror", "Seiryu", "Shanoa", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Lizard", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Volcano_Wasp", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zarklet", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
@@ -142,35 +146,35 @@ def is_voiced(nickname=None):
 
 def start_autobattle_hooks():
   global attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook, battle_has_ended_hook, battle_new_battler_has_entered_hook, battle_melee_only_hook
-  attack_tech_hook  = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_attack_tech_hook', '')
-  attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_attack_tech_hook', '')
-  attack_tech_hook3  = weechat.hook_print(arena_buffer(), botnick_tag(), '%s gets another turn.' % current_nickname(), 1, 'cb_attack_tech_hook', '')
+  # attack_tech_hook  = weechat.hook_print(arena_buffer(), botnick_tag(), 'It is %s\'s turn' % current_nickname(), 1, 'cb_turn_hook', '')
+  attack_tech_hook  = weechat.hook_print(arena_buffer(), botnick_tag(), "'s turn [Health Status:", 1, 'cb_turn_hook', '')
+  attack_tech_hook2 = weechat.hook_print(arena_buffer(), botnick_tag(), '%s steps up first in the battle!' % current_nickname(), 1, 'cb_turn_hook', '')
+  attack_tech_hook3  = weechat.hook_print(arena_buffer(), botnick_tag(), '%s gets another turn.' % current_nickname(), 1, 'cb_turn_hook', '')
   attack_out_of_tp_hook = weechat.hook_print(arena_buffer(), botnick_tag(), '%s does not have enough TP to perform this technique!' % current_nickname(), 1, 'cb_attack_out_of_tp_hook', '')
   battle_has_ended_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'The Battle is Over!', 1, 'cb_battle_has_ended_hook', '')
   battle_new_battler_has_entered_hook = weechat.hook_print(arena_buffer(), botnick_tag(), ' has entered the battle!', 1, 'cb_battle_new_battler_has_entered', '')
   battle_melee_only_hook = weechat.hook_print(arena_buffer(), botnick_tag(), 'An ancient Melee-Only symbol glows on the ground of the battlefield.', 1, 'cb_battle_melee_only', '')
   
 
-def start_autobattle():
-  stop_autobattle()
-
-  global portal_hooks, battle_mode
-  portal_hooks = [weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')]
-  start_autobattle_hooks()
-  set_battle_mode('AutoBattle')
-  weechat.prnt(weechat.current_buffer(),"AutoBattle started")
-
-def start_autobattle_orbtrain():
+def start_autobattle(mode='autoattack'):
   stop_autobattle()
 
   global portal_hooks
-  portal_hooks = []
-  for nick in OPTIONS['orbtrain_drivers'].split():
-    portal_hooks.append(weechat.hook_print(arena_buffer(), botnick_tag(), '%s has entered the battle!' % nick, 1, 'cb_enter_portal', ''))
+  if mode.lower() == 'autoattack':
+    portal_hooks = [weechat.hook_print(arena_buffer(), botnick_tag(), 'type !enter if you wish to join the battle!', 1, 'cb_enter_portal', '')]
+    set_battle_mode('AutoAttack')
+  elif mode.lower() == 'orbtrain':
+    portal_hooks = []
+    for nick in OPTIONS['orbtrain_drivers'].split():
+      portal_hooks.append(weechat.hook_print(arena_buffer(), botnick_tag(), '%s has entered the battle!' % nick, 1, 'cb_enter_portal', ''))
+    set_battle_mode('OrbTrain')
+  elif mode.lower() == 'tracking':
+    set_battle_mode('Tracking')
+  else:
+    set_battle_mode('Unknown')
 
   start_autobattle_hooks()
-  set_battle_mode('OrbTrain')
-  weechat.prnt(weechat.current_buffer(),"AutoBattle (OrbTrain style) started")
+  weechat.prnt(weechat.current_buffer(),"AutoBattle started in %s mode" % mode)
 
 def set_battle_mode(mode):
   global battle_mode
@@ -184,7 +188,7 @@ def cb_battle_mode_item(data, item, window):
     color = 'yellow'
   elif battle_mode == 'Normal':
     color = 'green'
-  elif battle_mode == 'AutoBattle':
+  elif battle_mode == 'AutoAttack':
     color = 'lightred'
   else:
     color = '*default'
@@ -351,6 +355,7 @@ def get_battler_for_name(name):
 def cb_battle_melee_only(data, buffer, date, tags, displayed, highlight, prefix, message):
   global melee_only
   melee_only = True
+  return weechat.WEECHAT_RC_OK
 
 def cb_battler_defeated_by(data, buffer, date, tags, displayed, highlight, prefix, message):
   global battlers, dead_characters, players, enemies, npcs, unknown
@@ -367,6 +372,8 @@ def cb_battler_defeated_by(data, buffer, date, tags, displayed, highlight, prefi
   if battler in enemies:
     del enemies[battler]
   elif battler in players:
+    if battler.lower() == current_nickname().lower():
+      update_health_status('Dead')
     del players[battler]
   elif battler in npcs:
     del npcs[battler]
@@ -532,10 +539,33 @@ def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, mess
   if not in_battle:
     in_battle = True
     weechat.hook_timer((choice([2,3,4])) * 1000, 0, 1, "cb_battlecommand", "!enter")
+    update_health_status('Perfect')
+    update_status_effects('None')
+    update_active_skills('None')
   return weechat.WEECHAT_RC_OK
 
-def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay, melee_only, has_stolen, has_taunted
+def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
+  global tp_delay, melee_only, has_stolen, has_taunted, battle_mode
+
+  regexp = re.compile("((?P<player_a>\S+) gets another turn.|(?P<player_b>\S+) steps up first in the battle!|It is (?P<player_c>\S+)'s turn \[Health Status: (?P<health_status>[^\]]+)\] \[Status Effects: (?P<status_effects>[^]]+)\] \[Active Skills: (?P<active_skills>[^\]]+)\])")
+  m = regexp.search(message)
+  if m:
+    player_list = [m.groupdict()['player_a'], m.groupdict()['player_b'], m.groupdict()['player_c']]
+    player = player_list[map(bool, player_list).index(True)]
+    update_player_turn(player)
+    if player == current_nickname():
+      update_health_status(m.groupdict()['health_status'])
+      update_status_effects(m.groupdict()['status_effects'])
+      update_active_skills(m.groupdict()['active_skills'])
+    else:
+      return weechat.WEECHAT_RC_OK
+  else:
+    weechat.prnt("", "Could not parse turn message: %s" % message)
+    return weechat.WEECHAT_RC_OK
+
+  if battle_mode.lower() in ('normal', 'tracking'):
+    return weechat.WEECHAT_RC_OK
+
   if melee_only:
     weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
     return weechat.WEECHAT_RC_OK
@@ -562,7 +592,9 @@ def cb_attack_tech_hook(data, buffer, date, tags, displayed, highlight, prefix, 
   return weechat.WEECHAT_RC_OK
 
 def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay
+  global tp_delay, battle_mode
+  if battle_mode.lower() not in ('autoattack', 'orbtrain'):
+    return weechat.WEECHAT_RC_OK
   tp_delay = 5
   weechat.command(buffer, "!tp")
   weechat.command(buffer, "!bat info")
@@ -576,6 +608,11 @@ def cb_battle_has_ended_hook(data, buffer, date, tags, displayed, highlight, pre
   melee_only = False
   has_taunted = False
   has_stolen = False
+  update_player_turn('')
+  update_health_status('')
+  update_status_effects('')
+  update_active_skills('')
+
   return weechat.WEECHAT_RC_OK
 
 def select_enemy():
@@ -702,6 +739,109 @@ def attack(enemy=None):
 def format_dict(d):
   return ' | '.join(['%s: %s' % (k, v) for k, v in d.items()])
 
+#=========================Bar items=============================
+def cb_player_turn_item(data, item, window):
+  global player_turn
+  if player_turn and len(player_turn) > 0:
+    return 'Turn: %s' % player_turn
+  else:
+    return ''
+
+def update_player_turn(player_string):
+  global player_turn
+  player_turn = player_string.strip()
+  weechat.bar_item_update("battlearena_player_turn")
+
+def cb_health_status_item(data, item, window):
+  global health_status
+  if health_status and len(health_status) > 0:
+    if health_status == 'Perfect':
+      color = '*green'
+      pct = '100%'
+    elif health_status == 'Great':
+      color = 'green'
+      pct = '90-100%'
+    elif health_status == 'Good':
+      color = '*lightgreen'
+      pct = '80-90%'
+    elif health_status == 'Decent':
+      color = 'lightgreen'
+      pct = '70-80%'
+    elif health_status == 'Scratched':
+      color = '*yellow'
+      pct = '60-70%'
+    elif health_status == 'Bruised':
+      color = 'yellow'
+      pct = '50-60%'
+    elif health_status == 'Hurt':
+      color = '*brown'
+      pct = '40-50%'
+    elif health_status == 'Injured':
+      color = 'brown'
+      pct = '30-40%'
+    elif health_status == 'Injured Badly':
+      color = 'lightred'
+      pct = '15-30%'
+    elif health_status == 'Critical':
+      color = 'red'
+      pct = '2-15%'
+    elif health_status == "Alive by a hair's bredth":
+      color = 'darkgrey'
+      pct = '0-2%'
+    else:
+      color = 'gray'
+      pct = '0%'
+    status_string = weechat.color(color) + health_status + weechat.color('reset') + ' (%s)' % pct
+    return 'Health: %s' % status_string
+  else:
+    return ''
+
+def update_health_status(health_string):
+  global health_status
+  health_status = health_string.strip()
+  weechat.bar_item_update("battlearena_health_status")
+
+
+
+def cb_status_effects_item(data, item, window):
+  global status_effects
+  if len(status_effects) > 0:
+    status_string = weechat.color('red') + '; '.join(status_effects) + weechat.color(COLORRESET)
+    return 'Status: %s' % status_string
+  else:
+    return ''
+
+def update_status_effects(status_effects_string):
+  global status_effects
+  status_effects = map(lambda s: s.strip(), status_effects_string.split('|'))
+  if status_effects_string and status_effects_string != '':
+    status_effects = map(lambda s: s.strip(), status_effects_string.split('|'))
+  else:
+    status_effects = []
+  weechat.bar_item_update("battlearena_status_effects")
+
+
+
+def cb_active_skills_item(data, item, window):
+  global active_skills
+  if active_skills and len(active_skills) > 0:
+    status_string = weechat.color('green') + '; '.join(active_skills) + weechat.color(COLORRESET)
+    return 'ASkills: %s' % status_string
+  else:
+    return ''
+
+def update_active_skills(skills_string):
+  global active_skills
+  if skills_string and skills_string != '':
+    active_skills = map(lambda s: s.strip(), skills_string.split('|'))
+  else:
+    active_skills = []
+  weechat.bar_item_update("battlearena_active_skills")
+
+
+#===============================================================
+
+
 def cb_command(data, buffer, args):
   global known_techs, current_weapon, available_techs, battlers, enemies, dead_characters, players, npcs, unknown
   if args[0] == '+': #+100str
@@ -735,11 +875,13 @@ def cb_command(data, buffer, args):
 
     if args[0] == 'autobattle':
       if args[1] == 'start':
-        start_autobattle()
+        start_autobattle('autoattack')
       if args[1] == 'orbtrain':
-        start_autobattle_orbtrain()
+        start_autobattle('orbtrain')
       elif args[1] == 'stop':
         stop_autobattle()
+      elif args[1] == 'tracking':
+        start_autobattle('tracking')
 
     elif args[0] == 'debug':
       if args[1] == 'techs':
@@ -816,9 +958,9 @@ if __name__ == "__main__":
     init_options()
     weechat.hook_completion("plugin_known_techs", "Known techs completion", "cb_completion_known_techs", "")
     weechat.hook_completion("plugin_available_techs", "Available techs completion", "cb_completion_available_techs", "")
-    weechat.hook_completion("plugin_battlers", "Battlers completion", "cb_completion_battle_order", "")
-    weechat.hook_completion("plugin_players", "Battlers completion", "cb_completion_battle_players", "")
-    weechat.hook_completion("plugin_enemies", "Battlers completion", "cb_completion_battle_enemies", "")
+    weechat.hook_completion("plugin_battlers", "Battlers (All) completion", "cb_completion_battle_order", "")
+    weechat.hook_completion("plugin_players", "Battlers (Players) completion", "cb_completion_battle_players", "")
+    weechat.hook_completion("plugin_enemies", "Battlers (Enemies) completion", "cb_completion_battle_enemies", "")
     weechat.hook_signal("EsperNET,irc_in2_privmsg", "cb_store_battle_order_colors", "")
     # weechat.hook_signal("EsperNET,irc_out_privmsg", "cb_store_battle_order_colors", "")
     if arena_buffer():
@@ -834,6 +976,10 @@ if __name__ == "__main__":
       orbs_bar_item = weechat.bar_item_new("battlearena_orbs", "cb_orbs_item", "")
       current_weapon_item = weechat.bar_item_new("battlearena_current_weapon", "cb_current_weapon_item", "")
       battle_mode_item = weechat.bar_item_new("battlearena_battle_mode", "cb_battle_mode_item", "")
+      player_turn_item = weechat.bar_item_new("battlearena_player_turn", "cb_player_turn_item", "")
+      health_item = weechat.bar_item_new("battlearena_health_status", "cb_health_status_item", "")
+      status_effects_item = weechat.bar_item_new("battlearena_status_effects", "cb_status_effects_item", "")
+      active_skills_item = weechat.bar_item_new("battlearena_active_skills", "cb_active_skills_item", "")
     weechat.hook_command("battlearena", "BattleArena client script with autobattle functions.",
         "[shop [list [items|techs|skills|stats|weapons|styles|orbs|ignitions|portal|misc|gems|alchemy]|buy [items|techs|skills|stats [hp|tp|ig|str|def|int|spd]|weapons|styles|orbs|ignitions|portal|misc|gems|alchemy]]] | autobattle [start|end]",
         "description of arguments...",
@@ -843,7 +989,7 @@ if __name__ == "__main__":
         " || techs list|buy %(plugin_available_techs)"
         " || use %(plugin_known_techs) %(plugin_enemies)|%(plugin_players)"
         " || setup bot "
-        " || autobattle orbtrain|start|stop",
+        " || autobattle orbtrain|start|stop|tracking",
         "cb_command", "")
 
 ## TODO LIST
@@ -854,15 +1000,18 @@ if __name__ == "__main__":
 #   - HP
 #   - TP
 #   - IG
-#   - Statuses
-#   - Skills
+#   - (Passive / Available) Skills
 #   - Owned Weapons
 #   - Techs
 #   - Alive enemies
 #   - Players
 #   - Accessory
 #   - Keys
+#   - Battle Status
 #
+# - Fix bar items for active skills and status effects so they don't show if there are none.
+#
+# - Parse "The following players have absorbed a black orb from the boss: Raiden, FiXato"
 # - Skip techs when cursed
 # - Warn when you have a key for a chest on the battle arena.
 #   - FiXato has the following keys: BrownKey(2), RedKey(1), GreenKey(1), GoldKey(1), PurpleKey(2)
