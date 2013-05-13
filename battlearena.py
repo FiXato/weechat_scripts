@@ -45,9 +45,13 @@ DEFAULT_OPTIONS         = {
   'preferred_tech_criteria': ('max_level current_weapon', 'Space separated list of preferred tech criteria. Leave empty to use the default, which is random.'),
   'override_tech': ('', 'Set this to a tech name if you want to override the tech that will be used during autobattle.'),
   'taunt_first': ('no', 'Set this to "yes" if you want to taunt an enemy first in the battle.  Use "random_once" if you want to leave it to choice once per battler, or "random_always" if you want it to always randomly try to taunt.'),
-  'steal_first': ('no', 'Set this to "yes" if you want to steal from an enemy first in the battle.')
+  'steal_first': ('no', 'Set this to "yes" if you want to steal from an enemy first in the battle.'),
+  'orbs.red.current': ('0', 'Current amount of red orbs.'),
+  'orbs.black.current': ('0', 'Current amount of black orbs.'),
+  'orbs.red.spent': ('0', 'Total amount of red orbs spent.'),
+  'orbs.black.spent': ('0', 'Total amount of black orbs spent.')
 }
-
+COLORRESET = 'resetcolor' #TODO: set this to 'reset' if version < 0.3.6 
 
 try:
   import weechat, re, os
@@ -69,17 +73,23 @@ players = {}
 unknown = {}
 current_weapon = None
 portal_hooks = []
+orbcount_hooks = []
 attack_tech_hook, attack_tech_hook2, attack_tech_hook3, attack_out_of_tp_hook = (None, None, None, None)
 battle_has_ended_hook, battle_melee_only_hook, battle_new_battler_has_entered_hook = (None, None, None)
 in_battle, melee_only, has_taunted, has_stolen = (False, False, False, False)
+retry_counter = 0
 
-known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Latrilth", "Leaping_Lizzie", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "PoisonSlime", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Seiryu", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
+known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "BeeBear", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cave_Tiger", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Citadel_Bats", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Warrior", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dredd", "Dresden", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Healing_Slime", "Heraldic_Imp", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Large_Warmachine", "Latrilth", "Leaping_Lizzie", "Lenneth", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "Pallid_Percy", "PoisonSlime", "Poisonhand", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Sabertooth_Tiger", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Sea_Horror", "Seiryu", "Shanoa", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Lizard", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Volcano_Wasp", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zarklet", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
 known_battlers_mapped = {'Demon Portal': 'Demon_Portal'}
 
 def arena_buffer():
   channel_name = OPTIONS['channel']
   bp = weechat.buffer_search("irc", channel_name)
+  return bp
+
+def bot_buffer():
+  bp = weechat.buffer_search("irc", '%s.%s' % (current_networkname(), botnick()))
   return bp
 
 def botnick_tag():
@@ -176,6 +186,51 @@ def change_style(style):
 
 #=================Retrieve Data========
 
+def add_orbcount_hooks():
+  global orbcount_hooks
+  orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'Black Orb(s) and has spent', 1, 'cb_orbcount', ''))
+  orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'For their victory, these players have been rewarded with Red Orbs', 1, 'cb_orb_reward', ''))
+  #TODO: FiXato unlocks the treasure chest and obtains 902 Red Orbs! The chest then disappears.
+
+def cb_orbcount(data, buffer, date, tags, displayed, highlight, prefix, message):
+  weechat.prnt("", message)
+  regexp = re.compile("(?P<player>\S+) has (?P<orbs_red_current>\S+) Red Orbs and (?P<orbs_black_current>\S+) Black Orb\(s\) and has spent (?P<orbs_red_spent>\S+) Red Orbs and (?P<orbs_black_spent>\S+) Black Orb\(s\) total!")
+  m = regexp.search(message)
+  if m and m.groupdict()['player'] == current_nickname():
+    for key in ('orbs.red.current', 'orbs.black.current', 'orbs.red.spent', 'orbs.black.spent'):
+      weechat.config_set_plugin(key, m.groupdict()[key.replace('.','_')])
+  return weechat.WEECHAT_RC_OK
+
+def cb_orb_reward(data, buffer, date, tags, displayed, highlight, prefix, message):
+  weechat.prnt("", message)
+  regexp = re.compile("For their victory, these players have been rewarded with Red Orbs: .*%s\[\+(?P<red_orbs>(\d{1,3},?)+)\] ?" % current_nickname())
+  m = regexp.search(message)
+  if m and m.groupdict()['red_orbs']:
+    new_red_orbs_count = orbs_string_to_int(OPTIONS['orbs.red.current']) + orbs_string_to_int(m.groupdict()['red_orbs'])
+    weechat.config_set_plugin('orbs.red.current', orbs_comma_string(new_red_orbs_count))
+      
+  return weechat.WEECHAT_RC_OK
+
+def get_orbcount():
+  botcommand("!orbs")
+  return weechat.WEECHAT_RC_OK
+
+def orbs_string_to_int(orbs):
+  return int(orbs.replace(',',''))
+
+def orbs_comma_string(orbs):
+  return "{:,}".format(int(str(orbs).replace(',','')))
+
+def cb_orbs_item(data, item, window):
+  red_current = weechat.color('red') + orbs_comma_string(OPTIONS['orbs.red.current']) + weechat.color(COLORRESET)
+  red_spent = weechat.color('red') + orbs_comma_string(OPTIONS['orbs.red.spent']) + weechat.color(COLORRESET)
+  black_current = weechat.color('darkgray') + orbs_comma_string(OPTIONS['orbs.black.current']) + weechat.color(COLORRESET)
+  black_spent = weechat.color('darkgray') + orbs_comma_string(OPTIONS['orbs.black.spent']) + weechat.color(COLORRESET)
+  return 'Orbs: %s/%s %s/%s' % (red_current, red_spent, black_current, black_spent)
+
+def cb_current_weapon_item(data, item, window):
+  global current_weapon
+  return "Weapon: %s" % current_weapon
 
 def get_battlers():
   target_string = '[Battle Order: '
@@ -324,12 +379,14 @@ def cb_battle_new_battler_has_entered(data, buffer, date, tags, displayed, highl
   if battler_name in known_battlers_mapped:
     weechat.prnt("", "Already know %s as %s" % (battler_name, known_battlers_mapped[battler_name]))
     enemies[known_battlers_mapped[battler_name].lower()] = known_battlers_mapped[battler_name]
+    battlers[known_battlers_mapped[battler_name].lower()] = known_battlers_mapped[battler_name]
     return weechat.WEECHAT_RC_OK
 
   plausible_battler_name = find_plausible_battler_for_name(battler_name)
   if plausible_battler_name:
     weechat.prnt("", "%s is probably %s" % (battler_name, plausible_battler_name))
     enemies[plausible_battler_name.lower()] = plausible_battler_name
+    battlers[plausible_battler_name.lower()] = plausible_battler_name
     known_battlers_mapped[battler_name] = plausible_battler_name
     save_known_battlers()
   return weechat.WEECHAT_RC_OK
@@ -343,13 +400,20 @@ def get_known_techs():
   known_techs_hook = weechat.hook_print("", botnick_tag(), target_string, 1, 'cb_store_known_techs', '')
   weechat.command(arena_buffer(),'/msg %s !techs' % botnick())
 
+def update_current_weapon(weapon):
+  global current_weapon
+  if current_weapon != weapon:
+    current_weapon = weapon
+    weechat.bar_item_update("battlearena_current_weapon")
+  return current_weapon
+
 def cb_store_known_techs(data, buffer, date, tags, displayed, highlight, prefix, message):
   global known_techs, current_weapon, all_known_techs_by_tech, all_known_techs_by_weapon
   regexp = r"(?P<nickname>\w+) knows the following techniques for (?P<pronoun>\w+) (?P<weapon>\w+): (?P<techs>.+)"
   m = re.match(regexp, message)
   nickname = m.groupdict()['nickname']
   pronoun = m.groupdict()['pronoun']
-  current_weapon = m.groupdict()['weapon']
+  current_weapon = update_current_weapon(m.groupdict()['weapon'])
   techs = m.groupdict()['techs']
   known_techs = []
 
@@ -553,6 +617,41 @@ def cb_battlecommand(data, remaining_calls):
   weechat.command(arena_buffer(), data)
   return weechat.WEECHAT_RC_OK
 
+def cb_botcommand(data, remaining_calls=0):
+  global retry_counter
+  buffer = bot_buffer()
+  if not buffer:
+    if retry_counter < 1:
+      weechat.prnt(weechat.current_buffer(), "Error: You need to open a query with the bot first. Will retry in 2 seconds.")
+      weechat.command(arena_buffer(),'/query %s' % (botnick()))
+      weechat.hook_timer(2 * 1000, 0, 1, "cb_botcommand", data)
+    else:
+      weechat.prnt(weechat.current_buffer(), "Error: You need to open a query with the bot first. Already tried retrying once; won't try again.")
+      return weechat.WEECHAT_RC_ERROR
+  else:
+    retry_counter = 0
+    weechat.command(buffer,data)
+  return weechat.WEECHAT_RC_OK
+
+def botcommand(cmd):
+  return cb_botcommand(cmd, 0)
+
+def cb_botmsg(data, remaining_calls=0):
+  buffer = bot_buffer()
+  if not buffer:
+    weechat.command(arena_buffer(),'/msg %s %s' % (botnick(), data))
+  else:
+    weechat.command(buffer,'%s' % (data))
+  return weechat.WEECHAT_RC_OK
+
+def cb_botaction(data, remaining_calls=0):
+  buffer = bot_buffer()
+  if not buffer:
+    weechat.command(arena_buffer(),'/CTCP %s ACTION %s' % (botnick(), data))
+  else:
+    weechat.command(buffer,'/me %s' % (data))
+  return weechat.WEECHAT_RC_OK
+
 def taunt_cmd(enemy):
   return "!taunt %s" % enemy
 
@@ -658,6 +757,8 @@ def cb_refresh_options(pointer, name, value):
   option = name[len('plugins.var.python.' + SCRIPT_NAME + '.'):]        # get optionname
   OPTIONS[option] = value                                               # save new value
   weechat.prnt("", "Updating OPTIONS[%s] with %s from %s" % (option, value, name))
+  if 'orbs' in option:
+    weechat.bar_item_update("battlearena_orbs")
   return weechat.WEECHAT_RC_OK
 
 def init_options():
@@ -701,6 +802,10 @@ if __name__ == "__main__":
       get_available_techs()
       get_battlers()
       load_known_battlers()
+      add_orbcount_hooks()
+      get_orbcount()
+      orbs_bar_item = weechat.bar_item_new("battlearena_orbs", "cb_orbs_item", "")
+      current_weapon_item = weechat.bar_item_new("battlearena_current_weapon", "cb_current_weapon_item", "")
     weechat.hook_command("battlearena", "BattleArena client script with autobattle functions.",
         "[shop [list [items|techs|skills|stats|weapons|styles|orbs|ignitions|portal|misc|gems|alchemy]|buy [items|techs|skills|stats [hp|tp|ig|str|def|int|spd]|weapons|styles|orbs|ignitions|portal|misc|gems|alchemy]]] | autobattle [start|end]",
         "description of arguments...",
@@ -741,4 +846,5 @@ if __name__ == "__main__":
 # - Add support for styles
 # - Make use of enemy info details such as:
 #   - "Water Elemental is a glowing orb of water magic. It seems resistant to melee."
+#   - "Volcano Wasp uses all of her health to perform this technique!" (Should move the enemy to dead_enemies)
 # - Capture the output of !shop list weapons and sort the weapons list by cost.
