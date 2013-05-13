@@ -84,9 +84,9 @@ health_status = ''
 status_effects = []
 active_skills = []
 
-known_battlers = ["AbsoluteVirtue", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "BeeBear", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cave_Tiger", "Cell", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Citadel_Bats", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Warrior", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dredd", "Dresden", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Healing_Slime", "Heraldic_Imp", "Iori", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Large_Warmachine", "Latrilth", "Leaping_Lizzie", "Lenneth", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "Pallid_Percy", "PoisonSlime", "Poisonhand", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Sabertooth_Tiger", "Samurai_Ghost", "Samus", "SandyClaws", "Scorpion", "Sea_Horror", "Seiryu", "Shanoa", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Lizard", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vergil", "Volcano_Wasp", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zarklet", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
+known_battlers = ["AbsoluteVirtue", "Acrobat", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Arucard", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "BeeBear", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cave_Tiger", "Cell", "Cell_clone", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Citadel_Bats", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Samurai", "Demon_Warrior", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dredd", "Dresden", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Healing_Slime", "Heraldic_Imp", "Ichigo", "Iori", "Ironshell", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Large_Warmachine", "Latrilth", "Leaping_Lizzie", "Lenneth", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "Pallid_Percy", "PoisonSlime", "Poisonhand", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Ryukotsuki", "Sabertooth_Tiger", "Samurai_Ghost", "Samus", "SandyClaws", "Sapphire_Quadav", "Scorpion", "Sea_Horror", "Seiryu", "Selan", "Shanoa", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Lizard", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Sub_Zero", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vampire_Bat", "Vergil", "Volcano_Wasp", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoko", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zarklet", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
-known_battlers_mapped = {'Demon Portal': 'Demon_Portal'}
+known_battlers_mapped = {'Demon Portal': 'Demon_Portal', 'New Age Retro Hippie': 'Retro_Hippie'}
 
 def arena_buffer():
   channel_name = OPTIONS['channel']
@@ -220,20 +220,54 @@ def add_orbcount_hooks():
   global orbcount_hooks
   orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'Black Orb(s) and has spent', 1, 'cb_orbcount', ''))
   orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'For their victory, these players have been rewarded with Red Orbs', 1, 'cb_orb_reward', ''))
+  orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'The following players have absorbed a black orb from the boss: ', 1, 'cb_black_orb_reward', ''))
+  orbcount_hooks.append(weechat.hook_print("", botnick_tag(), 'unlocks the treasure chest and obtains ', 1, 'cb_unlock_chest', ''))
   #TODO: FiXato unlocks the treasure chest and obtains 902 Red Orbs! The chest then disappears.
-  #TODO: The following players have absorbed a black orb from the boss: Tiranadel, FiXato
+
+def cb_unlock_chest(data, buffer, date, tags, displayed, highlight, prefix, message):
+  #TODO: FiXato unlocks the treasure chest and obtains 902 Red Orbs! The chest then disappears.
+  regexp = re.compile("(?P<player>\S+) unlocks the treasure chest and obtains (?P<amount>\S+) (?P<item>.+?)! The chest then disappears.")
+  m = regexp.search(message)
+  if m and m.groupdict()['player'] == current_nickname():
+    if m.groupdict()['item'] == 'Red Orbs':
+      new_red_orbs_count = orbs_string_to_int(OPTIONS['orbs.red.current']) + orbs_string_to_int(m.groupdict()['amount'])
+      weechat.config_set_plugin('orbs.red.current', comma_string(string_to_int(new_red_orbs_count)))
+    elif m.groupdict()['item'] == 'Black Orbs' or m.groupdict()['item'] == 'Black Orb':
+      new_black_orbs_count = orbs_string_to_int(OPTIONS['orbs.black.current']) + orbs_string_to_int(m.groupdict()['amount'])
+      weechat.config_set_plugin('orbs.black.current', comma_string(string_to_int(new_black_orbs_count)))
+    else:
+      # TODO: Parse other items
+      weechat.prnt("", "cb_unlock_chest(): Found: %sx %s" % (orbs_string_to_int(m.groupdict()['amount']), m.groupdict()['item']))
+  else:
+    weechat.prnt("", "cb_unlock_chest(): Can't find %s in %s" % (current_nickname(), message))
+  return weechat.WEECHAT_RC_OK
 
 def cb_orbcount(data, buffer, date, tags, displayed, highlight, prefix, message):
-  weechat.prnt("", message)
   regexp = re.compile("(?P<player>\S+) has (?P<orbs_red_current>\S+) Red Orbs and (?P<orbs_black_current>\S+) Black Orb\(s\) and has spent (?P<orbs_red_spent>\S+) Red Orbs and (?P<orbs_black_spent>\S+) Black Orb\(s\) total!")
   m = regexp.search(message)
   if m and m.groupdict()['player'] == current_nickname():
     for key in ('orbs.red.current', 'orbs.black.current', 'orbs.red.spent', 'orbs.black.spent'):
       weechat.config_set_plugin(key, m.groupdict()[key.replace('.','_')])
+  else:
+    weechat.prnt("", "cb_orbcount(): Can't find %s in %s" % (current_nickname(), message))
+  return weechat.WEECHAT_RC_OK
+
+def cb_black_orb_reward(data, buffer, date, tags, displayed, highlight, prefix, message):
+  weechat.prnt("", "cb_black_orb_reward(): %s" % message)
+  regexp = re.compile("The following players have absorbed a black orb from the boss: ([^,\s]+?, )*%s([^,\s]+?, )*" % current_nickname())
+  m = regexp.search(message)
+  if m:
+    weechat.prnt("", "cb_black_orb_reward(): Found a match for %s in %s" % (current_nickname(), message))
+    new_black_orbs_count = orbs_string_to_int(OPTIONS['orbs.black.current']) + 1
+    weechat.prnt("", "cb_black_orb_reward(): Increased black orbs count with 1 to %s" % new_black_orbs_count)
+    weechat.config_set_plugin('orbs.black.current', orbs_comma_string(new_black_orbs_count))
+  else:
+    weechat.prnt("", "cb_black_orb_reward(): Can't find %s in %s" % (current_nickname(), message))
+      
   return weechat.WEECHAT_RC_OK
 
 def cb_orb_reward(data, buffer, date, tags, displayed, highlight, prefix, message):
-  weechat.prnt("", message)
+  weechat.prnt("", "cb_orb_reward(): %s" % message)
   regexp = re.compile("For their victory, these players have been rewarded with Red Orbs: .*%s\[\+(?P<red_orbs>(\d{1,3},?)+)\] ?" % current_nickname())
   m = regexp.search(message)
   if m and m.groupdict()['red_orbs']:
@@ -246,11 +280,17 @@ def get_orbcount():
   botcommand("!orbs")
   return weechat.WEECHAT_RC_OK
 
+#TODO: Make these different
 def orbs_string_to_int(orbs):
   return int(orbs.replace(',',''))
+def string_to_int(item):
+  return orbs_string_to_int(item)
 
+#TODO: Make these different
 def orbs_comma_string(orbs):
   return "{:,}".format(int(str(orbs).replace(',','')))
+def comma_string(item):
+  return orbs_comma_string(item)
 
 def cb_orbs_item(data, item, window):
   red_current = weechat.color('red') + orbs_comma_string(OPTIONS['orbs.red.current']) + weechat.color(COLORRESET)
@@ -547,17 +587,19 @@ def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, mess
 def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
   global tp_delay, melee_only, has_stolen, has_taunted, battle_mode
 
-  regexp = re.compile("((?P<player_a>\S+) gets another turn.|(?P<player_b>\S+) steps up first in the battle!|It is (?P<player_c>\S+)'s turn \[Health Status: (?P<health_status>[^\]]+)\] \[Status Effects: (?P<status_effects>[^]]+)\] \[Active Skills: (?P<active_skills>[^\]]+)\])")
+  regexp = re.compile("((?P<player_a>.+?) gets another turn.|(?P<player_b>\S+) steps up first in the battle!|It is (?P<player_c>\S+)'s turn \[Health Status: (?P<health_status>[^\]]+)\] \[Status Effects: (?P<status_effects>[^]]+)\] \[Active Skills: (?P<active_skills>[^\]]+)\])")
   m = regexp.search(message)
   if m:
     player_list = [m.groupdict()['player_a'], m.groupdict()['player_b'], m.groupdict()['player_c']]
     player = player_list[map(bool, player_list).index(True)]
     update_player_turn(player)
     if player == current_nickname():
-      update_health_status(m.groupdict()['health_status'])
-      update_status_effects(m.groupdict()['status_effects'])
-      update_active_skills(m.groupdict()['active_skills'])
+      if m.groupdict()['health_status']:
+        update_health_status(m.groupdict()['health_status'])
+        update_status_effects(m.groupdict()['status_effects'])
+        update_active_skills(m.groupdict()['active_skills'])
     else:
+
       return weechat.WEECHAT_RC_OK
   else:
     weechat.prnt("", "Could not parse turn message: %s" % message)
@@ -792,14 +834,18 @@ def cb_health_status_item(data, item, window):
       color = 'gray'
       pct = '0%'
     status_string = weechat.color(color) + health_status + weechat.color('reset') + ' (%s)' % pct
-    return 'Health: %s' % status_string
+    return weechat.color('bold') + 'Health: ' + weechat.color('-bold') + status_string
   else:
     return ''
 
 def update_health_status(health_string):
   global health_status
-  health_status = health_string.strip()
+  if health_status:
+    health_status = health_string.strip()
+  else:
+    health_status = ''
   weechat.bar_item_update("battlearena_health_status")
+  return health_status
 
 
 
@@ -807,7 +853,7 @@ def cb_status_effects_item(data, item, window):
   global status_effects
   if len(status_effects) > 0:
     status_string = weechat.color('red') + '; '.join(status_effects) + weechat.color(COLORRESET)
-    return 'Status: %s' % status_string
+    return weechat.color('bold') + 'Status: ' + weechat.color('-bold') + status_string
   else:
     return ''
 
@@ -819,6 +865,7 @@ def update_status_effects(status_effects_string):
   else:
     status_effects = []
   weechat.bar_item_update("battlearena_status_effects")
+  return status_effects
 
 
 
@@ -826,7 +873,7 @@ def cb_active_skills_item(data, item, window):
   global active_skills
   if active_skills and len(active_skills) > 0:
     status_string = weechat.color('green') + '; '.join(active_skills) + weechat.color(COLORRESET)
-    return 'ASkills: %s' % status_string
+    return weechat.color('bold') + 'ASkills: ' + weechat.color('-bold') + status_string
   else:
     return ''
 
@@ -837,6 +884,7 @@ def update_active_skills(skills_string):
   else:
     active_skills = []
   weechat.bar_item_update("battlearena_active_skills")
+  return active_skills
 
 
 #===============================================================
