@@ -36,6 +36,7 @@ SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "BattleArena autobattler and tabcompletion support."
 
+DEBUG = True
 DEFAULT_OPTIONS         = {
   'channel': ('EsperNET.#battlearena', 'The network.#channel where the Battle Arena is located.'),
   'botnick': ('BattleArena', 'The nickname of the Battle Arena bot that runs the game.'),
@@ -86,7 +87,11 @@ active_skills = []
 
 known_battlers = ["AbsoluteVirtue", "Acrobat", "Ahtu", "Air_Elemental", "Alucard", "Anders", "AndroidX", "Aris", "Arucard", "Ashi", "Ashmaker_Gotblut", "Baelfyr", "BahamutFury", "Balrog", "Bark_Spider", "Bayonetta", "BearShark", "Bee", "BeeBear", "Bigmouth_Billy", "BloodGoyle", "Bloody_Bones", "BlueSlime", "Blue_MedusaHead", "Bone_Soldier", "Brauner", "Byrgen", "Cactuar", "Cave_Tiger", "Cell", "Cell_clone", "Cerberus", "Chimyriad", "Chuckie", "ChunLi", "Citadel_Bats", "Cloud", "Combat", "Count", "Count_Bifrons", "Countess", "Crazy_Jester", "Creeper", "Crimson_Slime", "CureSlime", "Cursed_Bishop", "Cursed_King", "Cursed_Pawn", "Cursed_Queen", "Cursed_Rook", "CyberLord", "Cyberman", "Dalek", "DalekEmperor", "Dante", "Daos", "Dark_Ixion", "Dark_Knight", "Dark_Octopus", "Death", "Decapiclops", "Dekar", "Demon_Knight", "Demon_Portal", "Demon_Samurai", "Demon_Warrior", "Demon_Wizard", "Devil_Manta", "Ding_Bats", "Dirt_Eater", "Don_Kanonji", "Drachenlizard", "Dracula", "Dragoon_Ghost", "Dredd", "Dresden", "Dullahan", "Dune_Widow", "Earth_Elemental", "Enchanted_Bones", "Ermit_Imp", "Fafnir", "Female_Vampire", "Final_Guard", "FootballZombie", "Forest_Giant", "Gades", "Garland", "GearRay", "GearRex", "Gekko", "GekkoDwarf", "Geyfyrst", "Ghost_Bomb", "Ghost_Samurai", "Goblin_Berserker", "Goblin_Enchanter", "Goblin_Shaman", "Goblin_Smithy", "Gold_MedusaHead", "Gold_MedusaHead_clone", "Gothmog", "Greater_Pugil", "GuardDaos", "Guardian_Treant", "HealSlime", "Healing_Slime", "Heraldic_Imp", "Ichigo", "Iori", "Ironshell", "Jailor_of_Love", "Jeffery", "Jester", "Juliet", "JumboCactuar", "Kain", "Ken", "Killer_Rabbit", "Kindred_Knight", "Kindred_Samurai", "Kindred_Warrior", "Kindred_Wizard", "KingSlime", "KnightsNi", "Kosmos", "Large_Warmachine", "Latrilth", "Leaping_Lizzie", "Lenneth", "M_Bison", "Magnes_Quadav", "Male_Vampire", "Mammoth", "Maneating_Hornet", "Maria", "Marquis_Caim", "Maxim", "Medium_Warmachine", "Megaman", "MegamanX", "Menos_Grande", "MetalSlime", "Midnight_Slime", "Minotaur", "Moblin", "Moonfang", "Nauthima", "Nauthima_Tiranadel", "Nightmare_Hornet", "Nightmare_Vanguard", "Ninja_Assassin", "Ninja_Assassin_clone", "Orcish_Grunt", "Orcish_Gunshooter", "Orcish_Impaler", "Orcish_Predator", "Orcish_Wyrmbrander", "Orphen", "Oxocutioner", "Pallid_Percy", "PoisonSlime", "Poisonhand", "Poring", "Pride_Demon", "Prishe", "Pugil", "Puppet_Master", "Rainemard", "Randith", "Reaver", "RedSlime", "Retro_Hippie", "Revenant", "River_Crab", "Rock_Lizard", "Rose", "Ruby_Quadav", "Ryu", "Ryudo", "Ryukotsuki", "Sabertooth_Tiger", "Samurai_Ghost", "Samus", "SandyClaws", "Sapphire_Quadav", "Scorpion", "Sea_Horror", "Seiryu", "Selan", "Shanoa", "Shrapnel", "Sierra_Tiger", "Simon_Belmont", "Small_Warmachine", "Snow_Giant", "Snow_Lizard", "Snow_Wight", "Soma", "Squall", "Starman_Ghost", "Starman_Junior", "Stefenth", "Stone_Eater", "Strolling_Sapling", "Sub_Zero", "Succubus", "Suzaku", "Terry", "Thunder_Elemental", "Tia", "Tiamat", "Treant", "TrueErim", "Undead_BlackMage", "Undead_Corsair", "Undead_Dragoon", "Undead_Knight", "Undead_Monk", "Undead_Ranger", "Undead_RedMage", "Undead_Samurai", "Ungeweder", "Unicorn", "Urahara", "Vampire_Bat", "Vergil", "Volcano_Wasp", "Vyse", "Water_Elemental", "Wild_Rabbit", "Wonenth", "Wooden_Puppet", "Wyvern", "Yagudo_Oracle", "Yagudo_Prior", "Yagudo_Prioress", "Yagudo_Scribe", "Yagudo_Zealot", "Yanthu", "Yoko", "Yoruichi", "Yoruichi_Shihouin", "Zark", "Zarklet", "Zero", "ZombieChef", "ZombieRockStar", "Zu", "chaos", "evil_FiXato", "evil_Tiranadel", "orb_fountain", "zombie"]
 
-known_battlers_mapped = {'Demon Portal': 'Demon_Portal', 'New Age Retro Hippie': 'Retro_Hippie'}
+known_battlers_mapped = {
+  'Demon Portal': 'Demon_Portal', 
+  'New Age Retro Hippie': 'Retro_Hippie',
+  'Medium Warmachine': 'Medium_Warmachine'
+}
 
 def arena_buffer():
   channel_name = OPTIONS['channel']
@@ -361,6 +366,7 @@ def cb_store_battle_order_colors(data, signal, signal_data): #(data, buffer, dat
 
 def sanitise_battler_name(name):
   alphanum_name = re.sub(r'[^a-zA-Z0-9]', '', name)
+  alphanum_name = alphanum_name.replace('evildoppelgangerof','evil')
   if 'anothermedusahead' in alphanum_name:
     return 'goldmedusaheadclone'
   elif 'vampirecount' == alphanum_name:
@@ -585,9 +591,9 @@ def cb_enter_portal(data, buffer, date, tags, displayed, highlight, prefix, mess
   return weechat.WEECHAT_RC_OK
 
 def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
-  global tp_delay, melee_only, has_stolen, has_taunted, battle_mode
+  global tp_delay, melee_only, battle_mode
 
-  regexp = re.compile("((?P<player_a>.+?) gets another turn.|(?P<player_b>\S+) steps up first in the battle!|It is (?P<player_c>\S+)'s turn \[Health Status: (?P<health_status>[^\]]+)\] \[Status Effects: (?P<status_effects>[^]]+)\] \[Active Skills: (?P<active_skills>[^\]]+)\])")
+  regexp = re.compile("((?P<player_a>.+?) gets another turn.|(?P<player_b>.+?) steps up first in the battle!|It is (?P<player_c>.+?)'s turn \[Health Status: (?P<health_status>[^\]]+)\] \[Status Effects: (?P<status_effects>[^]]+)\] \[Active Skills: (?P<active_skills>[^\]]+)\])")
   m = regexp.search(message)
   if m:
     player_list = [m.groupdict()['player_a'], m.groupdict()['player_b'], m.groupdict()['player_c']]
@@ -611,18 +617,12 @@ def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message
   if melee_only:
     weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
     return weechat.WEECHAT_RC_OK
-  if OPTIONS['steal_first'] == 'yes' and not has_stolen:
-    has_stolen = True
+  if check_steal():
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", steal_cmd(select_enemy()))
     return weechat.WEECHAT_RC_OK
-  if OPTIONS['taunt_first'] in ('yes', 'random_once', 'random_always') and not has_taunted:
-    will_taunt = choice([True, False])
-    weechat.prnt("", "Will taunt: %s" % will_taunt)
-    if will_taunt and OPTIONS['taunt_first'] != 'random_always':
-      has_taunted = True
-    if will_taunt:
-      weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", taunt_cmd(select_enemy()))
-      return weechat.WEECHAT_RC_OK
+  if check_taunt():
+    weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", taunt_cmd(select_enemy()))
+    return weechat.WEECHAT_RC_OK
   if tp_delay and tp_delay > 0:
     tp_delay -= 1
     weechat.prnt("", "Setting cb_battlecommand timer for attack_cmd")
@@ -632,6 +632,51 @@ def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message
     weechat.prnt("", "Setting cb_use_tech timer")
     weechat.hook_timer(4 * 1000, 0, 1, "cb_use_tech", "")
   return weechat.WEECHAT_RC_OK
+
+def log(obj):
+  if DEBUG:
+    weechat.prnt("", obj)
+
+def check_steal():
+  global has_stolen
+  if has_stolen:
+    log("Has already stolen from this party.")
+    return False
+
+  #TODO: Support stealing once *per enemy*
+  if OPTIONS['steal_first'] in ('yes', 'on'):
+    log("Will steal first because steal_first is %s" % OPTIONS['steal_first'])
+    has_stolen = True
+    return True
+  else:
+    return False
+
+def check_taunt():
+  global has_taunted
+  if has_taunted:
+    log("Have already taunted.")
+    return False
+
+  if OPTIONS['taunt_first'] in ('yes', 'on'):
+    log("Will taunt first")
+    will_taunt = True
+  elif OPTIONS['taunt_first'] in ('random_once', 'random_always'):
+    will_taunt = choice([True, False])
+    log("Random pick for taunt_first(%s): %s" % (OPTIONS['taunt_first'], will_taunt))
+  else:
+    log("Won't taunt because taunt_first is %s" % (OPTIONS['taunt_first']))
+    return False
+  
+  if not will_taunt:
+    log("Won't taunt because will_taunt is %s" % (will_taunt))
+    return False
+
+  if OPTIONS['taunt_first'] == 'random_always':
+    has_taunted = False
+  else:
+    has_taunted = True
+  log("has_taunted has been set to %s" % has_taunted)
+  return True
 
 def cb_attack_out_of_tp_hook(data, buffer, date, tags, displayed, highlight, prefix, message):
   global tp_delay, battle_mode
@@ -685,6 +730,8 @@ def select_tech(criteria=[]):
     tech = max(all_known_techs_by_weapon[weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[weapon][key])))
   elif 'weakest_level' in criteria:
     tech = min(all_known_techs_by_weapon[weapon].iterkeys(), key=(lambda key: int(all_known_techs_by_weapon[weapon][key])))
+  elif 'random' in criteria:
+    tech = choice(all_known_techs_by_weapon[weapon].keys())
   else:
     tech = choice(all_known_techs_by_weapon[weapon].keys())
   
