@@ -840,7 +840,7 @@ def cb_health_status_item(data, item, window):
 
 def update_health_status(health_string):
   global health_status
-  if health_status:
+  if health_string:
     health_status = health_string.strip()
   else:
     health_status = ''
