@@ -258,7 +258,7 @@ def cb_orbcount(data, buffer, date, tags, displayed, highlight, prefix, message)
   return weechat.WEECHAT_RC_OK
 
 def cb_black_orb_reward(data, buffer, date, tags, displayed, highlight, prefix, message):
-  log("", "cb_black_orb_reward(): %s" % message)
+  log("cb_black_orb_reward(): %s" % message)
   regexp = re.compile("The following players have absorbed a black orb from the boss: ([^,\s]+?, )*%s([^,\s]+?, )*" % current_nickname())
   m = regexp.search(message)
   if m:
