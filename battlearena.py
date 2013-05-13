@@ -614,14 +614,16 @@ def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message
   if battle_mode.lower() in ('normal', 'tracking'):
     return weechat.WEECHAT_RC_OK
 
-  if melee_only:
-    weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
+  if not can_attack():
     return weechat.WEECHAT_RC_OK
   if check_steal():
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", steal_cmd(select_enemy()))
     return weechat.WEECHAT_RC_OK
   if check_taunt():
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", taunt_cmd(select_enemy()))
+    return weechat.WEECHAT_RC_OK
+  if melee_only or check_cursed():
+    weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
     return weechat.WEECHAT_RC_OK
   if tp_delay and tp_delay > 0:
     tp_delay -= 1
@@ -636,6 +638,26 @@ def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message
 def log(obj):
   if DEBUG:
     weechat.prnt("", obj)
+
+def can_attack():
+  global status_effects
+  if 'intimidated' in status_effects:
+    return False
+  elif 'paralyzed' in status_effects:
+    return False
+  elif 'frozen in time' in status_effects:
+    return False
+  elif 'bored' in status_effects:
+    return False
+  elif 'stunned' in status_effects:
+    return False
+  return True
+
+def check_cursed():
+  global status_effects
+  if 'cursed' in status_effects:
+    return True
+  return False
 
 def check_steal():
   global has_stolen
