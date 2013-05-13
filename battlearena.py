@@ -242,9 +242,9 @@ def cb_unlock_chest(data, buffer, date, tags, displayed, highlight, prefix, mess
       weechat.config_set_plugin('orbs.black.current', comma_string(string_to_int(new_black_orbs_count)))
     else:
       # TODO: Parse other items
-      weechat.prnt("", "cb_unlock_chest(): Found: %sx %s" % (orbs_string_to_int(m.groupdict()['amount']), m.groupdict()['item']))
+      log("cb_unlock_chest(): Found: %sx %s" % (orbs_string_to_int(m.groupdict()['amount']), m.groupdict()['item']))
   else:
-    weechat.prnt("", "cb_unlock_chest(): Can't find %s in %s" % (current_nickname(), message))
+    log("cb_unlock_chest(): Can't find %s in %s" % (current_nickname(), message))
   return weechat.WEECHAT_RC_OK
 
 def cb_orbcount(data, buffer, date, tags, displayed, highlight, prefix, message):
@@ -254,25 +254,25 @@ def cb_orbcount(data, buffer, date, tags, displayed, highlight, prefix, message)
     for key in ('orbs.red.current', 'orbs.black.current', 'orbs.red.spent', 'orbs.black.spent'):
       weechat.config_set_plugin(key, m.groupdict()[key.replace('.','_')])
   else:
-    weechat.prnt("", "cb_orbcount(): Can't find %s in %s" % (current_nickname(), message))
+    log("cb_orbcount(): Can't find %s in %s" % (current_nickname(), message))
   return weechat.WEECHAT_RC_OK
 
 def cb_black_orb_reward(data, buffer, date, tags, displayed, highlight, prefix, message):
-  weechat.prnt("", "cb_black_orb_reward(): %s" % message)
+  log("", "cb_black_orb_reward(): %s" % message)
   regexp = re.compile("The following players have absorbed a black orb from the boss: ([^,\s]+?, )*%s([^,\s]+?, )*" % current_nickname())
   m = regexp.search(message)
   if m:
-    weechat.prnt("", "cb_black_orb_reward(): Found a match for %s in %s" % (current_nickname(), message))
+    log("cb_black_orb_reward(): Found a match for %s in %s" % (current_nickname(), message))
     new_black_orbs_count = orbs_string_to_int(OPTIONS['orbs.black.current']) + 1
-    weechat.prnt("", "cb_black_orb_reward(): Increased black orbs count with 1 to %s" % new_black_orbs_count)
+    log("cb_black_orb_reward(): Increased black orbs count with 1 to %s" % new_black_orbs_count)
     weechat.config_set_plugin('orbs.black.current', orbs_comma_string(new_black_orbs_count))
   else:
-    weechat.prnt("", "cb_black_orb_reward(): Can't find %s in %s" % (current_nickname(), message))
+    log("cb_black_orb_reward(): Can't find %s in %s" % (current_nickname(), message))
       
   return weechat.WEECHAT_RC_OK
 
 def cb_orb_reward(data, buffer, date, tags, displayed, highlight, prefix, message):
-  weechat.prnt("", "cb_orb_reward(): %s" % message)
+  log("cb_orb_reward(): %s" % message)
   regexp = re.compile("For their victory, these players have been rewarded with Red Orbs: .*%s\[\+(?P<red_orbs>(\d{1,3},?)+)\] ?" % current_nickname())
   m = regexp.search(message)
   if m and m.groupdict()['red_orbs']:
@@ -432,7 +432,6 @@ def cb_battler_defeated_by(data, buffer, date, tags, displayed, highlight, prefi
 def save_known_battlers():
   global known_battlers_mapped
   with open(OPTIONS['known_battlers_map_file'], 'w') as f:
-    weechat.prnt("", os.path.abspath(OPTIONS['known_battlers_map_file']))
     for battler_name, battler in known_battlers_mapped.iteritems():
       if battler and battler_name and len(battler) > 0 and len(battler_name) > 0:
         f.write("%s: %s\n" % (battler, battler_name))
@@ -440,7 +439,6 @@ def save_known_battlers():
 def load_known_battlers():
   global known_battlers_mapped
   try:
-    weechat.prnt("", os.path.abspath(OPTIONS['known_battlers_map_file']))
     with open(OPTIONS['known_battlers_map_file'], 'r') as f:
       for line in f:
         battler, sep, battler_name = line.partition(': ')
@@ -457,14 +455,14 @@ def cb_battle_new_battler_has_entered(data, buffer, date, tags, displayed, highl
   m = re.match(regexp, message)
   battler_name = m.groupdict()['battler']
   if battler_name in known_battlers_mapped:
-    weechat.prnt("", "Already know %s as %s" % (battler_name, known_battlers_mapped[battler_name]))
+    log("Already know %s as %s" % (battler_name, known_battlers_mapped[battler_name]))
     enemies[known_battlers_mapped[battler_name].lower()] = known_battlers_mapped[battler_name]
     battlers[known_battlers_mapped[battler_name].lower()] = known_battlers_mapped[battler_name]
     return weechat.WEECHAT_RC_OK
 
   plausible_battler_name = find_plausible_battler_for_name(battler_name)
   if plausible_battler_name:
-    weechat.prnt("", "%s is probably %s" % (battler_name, plausible_battler_name))
+    log("%s is probably %s" % (battler_name, plausible_battler_name))
     enemies[plausible_battler_name.lower()] = plausible_battler_name
     battlers[plausible_battler_name.lower()] = plausible_battler_name
     known_battlers_mapped[battler_name] = plausible_battler_name
@@ -627,11 +625,11 @@ def cb_turn_hook(data, buffer, date, tags, displayed, highlight, prefix, message
     return weechat.WEECHAT_RC_OK
   if tp_delay and tp_delay > 0:
     tp_delay -= 1
-    weechat.prnt("", "Setting cb_battlecommand timer for attack_cmd")
+    log("Setting cb_battlecommand timer for attack_cmd")
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", attack_cmd(select_enemy()))
   else:
     tp_delay = 0
-    weechat.prnt("", "Setting cb_use_tech timer")
+    log("Setting cb_use_tech timer")
     weechat.hook_timer(4 * 1000, 0, 1, "cb_use_tech", "")
   return weechat.WEECHAT_RC_OK
 
@@ -735,11 +733,11 @@ def debug_select_tech(criteria=[]):
   global current_weapon
   weapon, tech = select_tech(criteria)
   if weapon != current_weapon:
-    weechat.prnt("", equip_weapon_cmd(weapon))
+    log(equip_weapon_cmd(weapon))
     # weechat.command(arena_buffer(), equip_weapon_cmd(weapon))
     weechat.hook_timer(3 * 1000, 0, 1, "cb_battlecommand", tech_cmd(tech, 'SomeEnemy'))
   else:
-    weechat.prnt("", tech_cmd(tech, 'SomeEnemy'))
+    log(tech_cmd(tech, 'SomeEnemy'))
 
 def select_tech(criteria=[]):
   global all_known_techs_by_weapon, current_weapon
@@ -763,7 +761,7 @@ def cb_use_tech(data, remaining_calls):
   tech = None
   if OPTIONS['override_tech'] and len(OPTIONS['override_tech']) > 0:
     tech = OPTIONS['override_tech']
-    weechat.prnt("", "Set tech to %s" % tech)
+    log("Set tech to %s" % tech)
   use_tech(tech)
   return weechat.WEECHAT_RC_OK
 
@@ -778,9 +776,9 @@ def use_tech(tech=None, enemy=None):
     else:
       criteria = OPTIONS['preferred_tech_criteria'].split()
     weapon, tech = select_tech(criteria)
-    weechat.prnt("", "Tech wasn't set, so selected %s as tech based on %s criteria" % (tech, ' & '.join(criteria)))
+    log("Tech wasn't set, so selected %s as tech based on %s criteria" % (tech, ' & '.join(criteria)))
     
-  weechat.prnt("", "Will attack %s with tech %s using %s" % (enemy, tech, weapon))
+  log("Will attack %s with tech %s using %s" % (enemy, tech, weapon))
   if weapon != current_weapon:
     weechat.command(arena_buffer(), equip_weapon_cmd(weapon))
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", tech_cmd(tech, enemy))
@@ -788,7 +786,6 @@ def use_tech(tech=None, enemy=None):
     weechat.hook_timer(4 * 1000, 0, 1, "cb_battlecommand", tech_cmd(tech, enemy))
 
 def cb_battlecommand(data, remaining_calls):
-  weechat.prnt("", "Battle command! Remaining: %s" % remaining_calls)
   weechat.command(arena_buffer(), data)
   return weechat.WEECHAT_RC_OK
 
@@ -1002,11 +999,11 @@ def cb_command(data, buffer, args):
 
     elif args[0] == 'debug':
       if args[1] == 'techs':
-        weechat.prnt("", "Weakest current weapon:")
+        log("Weakest current weapon:")
         debug_select_tech(['weakest_level', 'current_weapon'])
-        weechat.prnt("", "Best current weapon:")
+        log("Best current weapon:")
         debug_select_tech(['max_level', 'current_weapon'])
-        weechat.prnt("", "Defaults:")
+        log("Defaults:")
         debug_select_tech()
       if args[1] == 'save':
         save_known_battlers()
@@ -1042,7 +1039,7 @@ def cb_refresh_options(pointer, name, value):
   global OPTIONS
   option = name[len('plugins.var.python.' + SCRIPT_NAME + '.'):]        # get optionname
   OPTIONS[option] = value                                               # save new value
-  weechat.prnt("", "Updating OPTIONS[%s] with %s from %s" % (option, value, name))
+  log("Updating OPTIONS[%s] with %s from %s" % (option, value, name))
   if 'orbs' in option:
     weechat.bar_item_update("battlearena_orbs")
   return weechat.WEECHAT_RC_OK
@@ -1052,12 +1049,10 @@ def init_options():
   OPTIONS = {}
   for option,value in list(DEFAULT_OPTIONS.items()):
     if not weechat.config_get_plugin(option):
-      # weechat.prnt("", "Initialising from DEFAULT_OPTIONS[%s] with %s" % (option, value[0]))
       weechat.config_set_plugin(option, value[0])
       #No need to set the OPTION here as cb_refresh_options should take care of that
     else:
       stored_value = weechat.config_get_plugin(option)
-      # weechat.prnt("", "Initialising to OPTIONS[%s] from stored variable with %s" % (option, stored_value))
       OPTIONS[option] = stored_value
     #TODO: fix so it doesn't break older weechats that don't support descriptions
     weechat.config_set_desc_plugin(option, '%s (default: "%s")' % (value[1], value[0]))
@@ -1082,7 +1077,7 @@ if __name__ == "__main__":
     # weechat.hook_signal("EsperNET,irc_out_privmsg", "cb_store_battle_order_colors", "")
     if arena_buffer():
       if not is_voiced():
-        weechat.prnt("", "Not voiced.")
+        log("Not voiced.")
         weechat.command(arena_buffer(),'/msg %s !id %s' % (botnick(), OPTIONS['password']))
       get_known_techs()
       get_available_techs()
