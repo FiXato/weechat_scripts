@@ -18,21 +18,41 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # 2013-05-07: FiXato (freenode.#weechat / espernet.#battlearena)
-#       0.1 : initial release
+#        0.1: initial release
 # 2013-05-11: FiXato (freenode.#weechat / espernet.#battlearena)
-#       0.2 : Whole bunch of changes I still need to list here.
+#        0.2: Whole bunch of changes I still need to list here.
 # 2013-05-12: FiXato (freenode.#weechat / espernet.#battlearena)
-#       0.3 : Added Taunting and stealing support amongst others:
+#        0.3: Added Taunting and stealing support amongst others:
 #             - Added support for 'gets another turn'.
 #             - Also fixed new battle enemy mapping.
 #             - Added 'steal_first' setting.
 #             - Added 'taunt_first' setting.
 #             - Removed cb_attack in favour of cb_battlecommand.
 #             - Added a couple more TODOs
-#
+# 2013-05-14: FiXato (freenode.#weechat / espernet.#battlearena)
+#        0.4: Improved autobattle support and added bar items:
+#             - Red and Black Orbs are now tracked in:
+#               * !orbs response
+#               * 'Boss defeated' messages
+#               * 'End of battle' messages
+#               * 'Unlocked treasure chest' messages
+#             - Bunch of bar items added:
+#               * battlearena_orbs
+#               * battlearena_current_weapon
+#               * battlearena_battle_mode
+#               * battlearena_player_turn
+#               * battlearena_health_status
+#               * battlearena_status_effects
+#               * battlearena_active_skills
+#             - Added 'Tracking' AutoBattle mode
+#             - Renamed default AutoBattle mode to 'AutoAttack'
+#             - Improved stealing and taunting logic.
+#             - Added support for curse and melee-only
+#             - Taking various status effects into account at your turn
+#             - DEBUG log() support added.
 SCRIPT_NAME     = "battlearena"
 SCRIPT_AUTHOR   = "FiXato <FiXato+weechat@gmail.com>"
-SCRIPT_VERSION  = "0.3"
+SCRIPT_VERSION  = "0.4"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "BattleArena autobattler and tabcompletion support."
 
@@ -651,6 +671,8 @@ def can_attack():
     return False
   elif 'stunned' in status_effects:
     return False
+  elif 'confused' in status_effects:
+    return False
   return True
 
 def check_cursed():
@@ -929,7 +951,7 @@ def update_status_effects(status_effects_string):
   global status_effects
   status_effects = map(lambda s: s.strip(), status_effects_string.split('|'))
   if status_effects_string and status_effects_string != '':
-    status_effects = map(lambda s: s.strip(), status_effects_string.split('|'))
+    status_effects = map(lambda s: s.strip(), status_effects_string.replace("\t",' ').split('|'))
   else:
     status_effects = []
   weechat.bar_item_update("battlearena_status_effects")
