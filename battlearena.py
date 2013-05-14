@@ -647,6 +647,8 @@ def can_attack():
     return False
   elif 'bored' in status_effects:
     return False
+  elif 'blind' in status_effects:
+    return False
   elif 'stunned' in status_effects:
     return False
   return True
