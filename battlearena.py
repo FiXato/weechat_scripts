@@ -287,7 +287,7 @@ def get_orbcount():
 
 #TODO: Make these different
 def orbs_string_to_int(orbs):
-  return int(orbs.replace(',',''))
+  return int(str(orbs).replace(',',''))
 def string_to_int(item):
   return orbs_string_to_int(item)
 
@@ -1119,20 +1119,16 @@ if __name__ == "__main__":
 #   - Players
 #   - Accessory
 #   - Keys
-#   - Battle Status
 #
-# - Fix bar items for active skills and status effects so they don't show if there are none.
-#
-# - Parse "The following players have absorbed a black orb from the boss: Raiden, FiXato"
-# - Skip techs when cursed
 # - Warn when you have a key for a chest on the battle arena.
 #   - FiXato has the following keys: BrownKey(2), RedKey(1), GreenKey(1), GoldKey(1), PurpleKey(2)
 # - Keep track of received and used items
 # - Keep track of shop level and auto-use UltraDiscountCard when above 25 (Or above 26 if you have a VIP-Membercard)
 # - Update the command description and tab completion.
-# - Add support for skills
-# - Add support for styles
+# - Add tab completion support for skills
+# - Add tab completion support for styles
 # - Make use of enemy info details such as:
 #   - "Water Elemental is a glowing orb of water magic. It seems resistant to melee."
 #   - "Volcano Wasp uses all of her health to perform this technique!" (Should move the enemy to dead_enemies)
+#   - "Creeper uses all of its health to perform this technique!" / "Creeper glows as the gunpowder that makes up its body begins to ignite. Within seconds the Creeper expands and explodes violently. The explosion hits everyone on the battlefield."
 # - Capture the output of !shop list weapons and sort the weapons list by cost.
