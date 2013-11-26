@@ -12,13 +12,13 @@
 #
 ## History:
 ### 2011-09-08: FiXato:
-# 
+#
 # * version 0.1:  initial release.
 #     * added a common buffer for /list results
 #     * added highlighting for currently selected line
 #     * added /join support via enter key
 #     * added scroll_top and scroll_bottom support
-# 
+#
 # * version 0.2:  /list format bugfix
 #     * added support for /list results without modes
 #     * some servers don't send 321 (/list start). Taken into account.
@@ -29,7 +29,7 @@
 #
 ### 2011-09-19: FiXato
 #
-# * version 0.4: 
+# * version 0.4:
 #     * Case-insensitive buffer lookup fix.
 #     * Removed default enter keybind
 #
@@ -58,15 +58,19 @@
 ### 2013-03-19: FiXato:
 #
 # * version 0.8: Sorted out the sorting
-#     * Added automatically updating options for sorting: 
+#     * Added automatically updating options for sorting:
 #       * plugins.var.python.listbuffer.sort_inverted
-#       * plugins.var.python.listbuffer.sort_order 
+#       * plugins.var.python.listbuffer.sort_order
 # * version 0.8.1: Pad it baby!
 #     * Channel modes are equally padded even when there are no channel modes.
-#     * Added padding options: 
+#     * Added padding options:
 #       * plugins.var.python.listbuffer.modes_min_width
 #       * plugins.var.python.listbuffer.channel_min_width
 #       * plugins.var.python.listbuffer.users_min_width
+#
+### 2013-11-25: unferth:
+#
+# * version 0.8.2: Page up/down fix
 #
 ## Acknowledgements:
 # * Dmitry "troydm" Geurkov, for providing the inverse-sorting patch to the project.
@@ -76,15 +80,15 @@
 #    example code.
 # * David "drubin" Rubin, for his urlgrab.py script, which also served
 #    as example code.
-# * ArZa, whose listsort.pl script helped me getting started with 
+# * ArZa, whose listsort.pl script helped me getting started with
 #    grabbing the /list results. Parts of his code have been shamelessly
 #    copied and ported to Python.
-# * Khaled Mardam-Bey, for making me yearn for similar /list support in 
+# * Khaled Mardam-Bey, for making me yearn for similar /list support in
 #    WeeChat as mIRC already offered. :P
 # * mave_, for pointing out that sort orders weren't remembered.
 #
-## TODO: 
-#   - Auto-scroll selected line upon window scroll.
+## TODO:
+#   - Fix pgup/pgdn to use height of buffer instead of 10 lines
 #   - Add option to hide already joined channels.
 #   - Improve sorting methods
 #   - Add auto-join support
@@ -177,6 +181,8 @@ def lb_create_buffer():
     weechat.buffer_set(lb_buffer, "key_bind_ctrl-L", "/listbuffer **refresh")
     weechat.buffer_set(lb_buffer, "key_bind_meta2-A", "/listbuffer **up")
     weechat.buffer_set(lb_buffer, "key_bind_meta2-B", "/listbuffer **down")
+    weechat.buffer_set(lb_buffer, "key_bind_meta2-5~", "/listbuffer **page_up")
+    weechat.buffer_set(lb_buffer, "key_bind_meta2-6~", "/listbuffer **page_down")
     weechat.buffer_set(lb_buffer, "key_bind_meta2-1~", "/listbuffer **scroll_top")
     weechat.buffer_set(lb_buffer, "key_bind_meta2-4~", "/listbuffer **scroll_bottom")
     weechat.buffer_set(lb_buffer, "key_bind_meta-ctrl-J", "/listbuffer **enter")
@@ -193,16 +199,16 @@ def lb_set_buffer_title():
   global lb_buffer, lb_current_sort
   ascdesc = '(v)' if lb_sort_inverted else '(^)'
   weechat.buffer_set(lb_buffer, "title", lb_line_format({
-    'channel': 'Channel name%s' % (ascdesc if lb_current_sort == 'channel' else ''), 
-    'users': 'Users%s' % (ascdesc if lb_current_sort == 'users' else ''), 
-    'modes': 'Modes%s' % (ascdesc if lb_current_sort == 'modes' else ''), 
-    'topic': 'Topic%s' % (ascdesc if lb_current_sort == 'topic' else ''), 
+    'channel': 'Channel name%s' % (ascdesc if lb_current_sort == 'channel' else ''),
+    'users': 'Users%s' % (ascdesc if lb_current_sort == 'users' else ''),
+    'modes': 'Modes%s' % (ascdesc if lb_current_sort == 'modes' else ''),
+    'topic': 'Topic%s' % (ascdesc if lb_current_sort == 'topic' else ''),
     'nomodes': None,
   }))
 
 def lb_list_start(data, signal, message):
   lb_initialise_list
-  
+
   return weechat.WEECHAT_RC_OK
 
 def lb_initialise_list(signal):
@@ -226,8 +232,8 @@ def lb_list_chan(data, signal, message):
     lb_channels.append({
       'server':  chan_data[0][1:-1],
       'numeric': chan_data[1],
-      'nick':    chan_data[2], 
-      'channel': chan_data[3], 
+      'nick':    chan_data[2],
+      'channel': chan_data[3],
       'users':   chan_data[4],
       'nomodes': chan_data[5] == '',
       'modes':   chan_data[6],
@@ -251,7 +257,7 @@ def lb_list_end(data, signal, message):
 def keyEvent (data, buffer, args):
   global lb_options
   lb_options[args]()
-  
+
 def lb_input_cb(data, buffer, input_data):
   global lb_options, lb_curline
   lb_options[input_data]()
@@ -325,11 +331,37 @@ def lb_line_run():
 def lb_line_select():
   return
 
+def lb_page_up():
+  global lb_curline
+  old_y = lb_curline
+  if lb_curline <= 0:
+    return
+  lb_curline -= 10
+  if lb_curline < 0:
+    lb_curline = 0
+  lb_refresh_curline()
+  lb_refresh_line(old_y)
+  lb_check_outside_window()
+  return
+
+def lb_page_down():
+  global lb_curline
+  old_y = lb_curline
+  if lb_curline >= len(lb_channels)-1:
+    return
+  lb_curline += 10
+  if lb_curline > len(lb_channels)-1:
+    lb_curline = len(lb_channels)-1
+  lb_refresh_curline()
+  lb_refresh_line(old_y)
+  lb_check_outside_window()
+  return
+
 def lb_scroll_top():
   global lb_curline
   old_y = lb_curline
   lb_curline = 0
-  lb_refresh_curline()  
+  lb_refresh_curline()
   lb_refresh_line(old_y)
   weechat.command(lb_buffer, "/window scroll_top")
   return
@@ -410,7 +442,7 @@ def lb_sort_invert():
   if lb_current_sort:
     lb_set_invert_sort_order(not lb_sort_inverted)
     lb_sort()
-  
+
 def lb_close_cb(*kwargs):
   """ A callback for buffer closing. """
   global lb_buffer
@@ -424,6 +456,8 @@ lb_options = {
   'down'        : lb_line_down,
   'enter'       : lb_line_run,
   'space'       : lb_line_select,
+  'page_up'     : lb_page_up,
+  'page_down'   : lb_page_down,
   'scroll_top'  : lb_scroll_top,
   'scroll_bottom': lb_scroll_bottom,
   'sort_next'   : lb_sort_next,
@@ -461,7 +495,7 @@ if __name__ == "__main__" and import_ok:
     weechat.hook_signal("*,irc_in_321", "lb_list_start", "")
     weechat.hook_signal("*,irc_in_322", "lb_list_chan", "")
     weechat.hook_signal("*,irc_in_323", "lb_list_end", "")
-    weechat.hook_command(SCRIPT_COMMAND, 
+    weechat.hook_command(SCRIPT_COMMAND,
                           "List Buffer",
-                          "", "", "", 
+                          "", "", "",
                           "lb_command_main", "")
