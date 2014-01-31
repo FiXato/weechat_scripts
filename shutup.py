@@ -23,7 +23,7 @@
 #
 # requires: WeeChat version 0.3.6 or higher
 #
-# Thanks go out to nils_2 for providing his skeleton.py template.
+# Thanks go out to nils_2 for providing his skeleton.py template, available at https://github.com/weechatter/weechat-scripts/blob/master/python/skeleton.py
 #
 # Development is currently hosted at
 # https://github.com/FiXato/weechat_scripts
