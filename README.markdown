@@ -5,6 +5,9 @@ My personal repository of scripts for the WeeChat chat client, www.weechat.org
 
 Scripts I've written to add features to WeeChat I felt were missing.
 
+## Discontinuation notice
+As I lack the time to actively chat on IRC, let alone develop these scripts, this repository is no longer actively maintained, and thus will be archived.
+
 ## Overview
 
 * clone_scanner.py
