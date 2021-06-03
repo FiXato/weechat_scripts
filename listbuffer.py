@@ -267,6 +267,11 @@ def lb_refresh():
     y += 1
   return
 
+def lb_close():
+  global lb_channels, lb_buffer
+  weechat.buffer_close(lb_buffer)
+  return
+
 def lb_refresh_line(y):
   global lb_buffer, lb_curline, lb_channels
   if y >= 0 and y < len(lb_channels):
@@ -428,7 +433,8 @@ lb_options = {
   'scroll_bottom': lb_scroll_bottom,
   'sort_next'   : lb_sort_next,
   'sort_previous': lb_sort_previous,
-  'sort_invert': lb_sort_invert
+  'sort_invert': lb_sort_invert,
+  'q': lb_close,
 }
 
 def lb_command_main(data, buffer, args):
